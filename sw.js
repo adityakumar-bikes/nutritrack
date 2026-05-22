@@ -1,20 +1,16 @@
 // NutriTrack Service Worker
-const CACHE_NAME = 'nutritrack-v1';
+const CACHE_NAME = 'nutritrack-v2';
 
-const ASSETS = [
-  '/nutritrack/',
-  '/nutritrack/index.html',
-  '/nutritrack/manifest.json',
-  '/nutritrack/firebase-config.js',
+const STATIC_ASSETS = [
   '/nutritrack/icons/icon-192.png',
   '/nutritrack/icons/icon-512.png',
   '/nutritrack/icons/apple-touch-icon.png'
 ];
 
-// ── Install: cache all shell assets ──────────────────────────────────────────
+// ── Install: cache only static assets (not HTML) ─────────────────────────────
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
+    caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS))
   );
   self.skipWaiting();
 });
@@ -31,37 +27,40 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// ── Fetch: cache-first for shell, network-first for API calls ─────────────────
+// ── Fetch ─────────────────────────────────────────────────────────────────────
 self.addEventListener('fetch', event => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Let Anthropic API calls go straight to network (never cache)
-  if (url.hostname.includes('anthropic.com') || url.hostname.includes('claude.ai')) {
+  // Never intercept non-GET or external API calls
+  if (request.method !== 'GET') return;
+  if (url.hostname.includes('anthropic.com') || url.hostname.includes('firebaseio.com') ||
+      url.hostname.includes('googleapis.com') || url.hostname.includes('gstatic.com')) return;
+
+  // Network-first for HTML and JS files — always get latest on deploy
+  if (request.mode === 'navigate' ||
+      url.pathname.endsWith('.html') ||
+      url.pathname.endsWith('.js') ||
+      url.pathname === '/nutritrack/' ||
+      url.pathname === '/nutritrack') {
+    event.respondWith(
+      fetch(request).then(response => {
+        return response;
+      }).catch(() => caches.match(request))
+    );
     return;
   }
 
-  // Cache-first for everything else
+  // Cache-first for static assets (icons, images)
   event.respondWith(
     caches.match(request).then(cached => {
       if (cached) return cached;
-
       return fetch(request).then(response => {
-        // Only cache same-origin GET responses
-        if (
-          request.method === 'GET' &&
-          url.origin === self.location.origin &&
-          response.status === 200
-        ) {
+        if (response.status === 200) {
           const clone = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
         }
         return response;
-      }).catch(() => {
-        // Offline fallback: return cached index.html for navigation requests
-        if (request.mode === 'navigate') {
-          return caches.match('/index.html');
-        }
       });
     })
   );
