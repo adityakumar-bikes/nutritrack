@@ -1,0 +1,41 @@
+{
+  "name": "NutriTrack — AI Nutrition Counter",
+  "short_name": "NutriTrack",
+  "description": "AI-powered calorie and nutrition tracker with diet mode, macro tracking, and water intake logging.",
+  "start_url": "/nutritrack/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "categories": ["health", "fitness", "food"],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Add Food",
+      "short_name": "Add",
+      "description": "Log a new food item",
+      "url": "/?tab=add",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Today's Log",
+      "short_name": "Today",
+      "description": "View today's food log",
+      "url": "/?tab=home",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
