@@ -6,12 +6,12 @@
 // ═══════════════════════════════════════════════════════════
 
 const FIREBASE_CONFIG = {
-  apiKey:            "YOUR_API_KEY",
-  authDomain:        "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId:         "YOUR_PROJECT_ID",
-  storageBucket:     "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId:             "YOUR_APP_ID"
+  apiKey:            "AIzaSyARJJxV1N9YkqCkIf7BDxUaQpoF-D_8U9U",
+  authDomain:        "bike-nutri.firebaseapp.com",
+  projectId:         "bike-nutri",
+  storageBucket:     "bike-nutri.firebasestorage.app",
+  messagingSenderId: "927858241358",
+  appId:             "1:927858241358:web:ac458b21bc0da5ecdf381f"
 };
 
 // The first admin — this email is auto-promoted on first sign-in
