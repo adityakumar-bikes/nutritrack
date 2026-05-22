@@ -6028,7 +6028,7 @@ function refreshAccountWidget(){
     roleEl.className   = 'acct-role ' + (u.role === 'admin' ? 'admin' : 'user');
   }
   if(fallback && u.photo){
-    fallback.outerHTML = '<img class="acct-avatar" id="acctAvatarFallback" src="'+u.photo+'" alt="avatar" onerror="this.outerHTML='<div class=acct-avatar-fallback id=acctAvatarFallback>👤</div>'">';
+    fallback.outerHTML = '<img class="acct-avatar" id="acctAvatarFallback" src="'+u.photo+'" alt="avatar" onerror="this.outerHTML=\'<div class=acct-avatar-fallback id=acctAvatarFallback>👤<\/div>\'">';
   }
 }
 
@@ -6085,20 +6085,20 @@ function renderUserCard(u, isPending){
   var isSelf  = window._ntCurrentUser && u.uid === window._ntCurrentUser.uid;
   var isAdmin = u.role === 'admin';
   var avatarHtml = u.photo
-    ? '<img class="ucard-avatar" src="'+u.photo+'" alt="" onerror="this.style.display='none'">'
+    ? '<img class="ucard-avatar" src="'+u.photo+'" alt="" onerror="this.style.display=\'none\'">'
     : '<div class="ucard-avatar">👤</div>';
   var joined = u.createdAt && u.createdAt.toDate ? u.createdAt.toDate().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '—';
   var actions = '';
   if(isPending){
-    actions = '<button class="ua-btn ua-approve" onclick="approveUser(''+u.uid+'')">✓ Approve</button>'
-            + '<button class="ua-btn ua-reject"  onclick="rejectUser(''+u.uid+'')">✕ Reject</button>';
+    actions = '<button class="ua-btn ua-approve" onclick="approveUser(\''+u.uid+'\')">✓ Approve</button>'
+            + '<button class="ua-btn ua-reject"  onclick="rejectUser(\''+u.uid+'\')">✕ Reject</button>';
   } else if(!isSelf){
     if(isAdmin){
-      actions = '<button class="ua-btn ua-rmadmin" onclick="setUserRole(''+u.uid+'','user')">Remove Admin</button>'
-              + '<button class="ua-btn ua-remove"   onclick="removeUser(''+u.uid+'')">Remove</button>';
+      actions = '<button class="ua-btn ua-rmadmin" onclick="setUserRole(\''+u.uid+'\',\'user\')">Remove Admin</button>'
+              + '<button class="ua-btn ua-remove"   onclick="removeUser(\''+u.uid+'\')">Remove</button>';
     } else {
-      actions = '<button class="ua-btn ua-mkadmin" onclick="setUserRole(''+u.uid+'','admin')">Make Admin</button>'
-              + '<button class="ua-btn ua-remove"   onclick="removeUser(''+u.uid+'')">Remove</button>';
+      actions = '<button class="ua-btn ua-mkadmin" onclick="setUserRole(\''+u.uid+'\',\'admin\')">Make Admin</button>'
+              + '<button class="ua-btn ua-remove"   onclick="removeUser(\''+u.uid+'\')">Remove</button>';
     }
   } else {
     actions = '<span style="font-size:11px;color:var(--t3)">You</span>';
