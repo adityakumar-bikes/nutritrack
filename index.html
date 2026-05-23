@@ -628,6 +628,7 @@ body{height:100vh;height:100dvh;}
 </head>
 <body>
 <div class="ss"></div>
+<div id="versionBadge" style="display:none;position:fixed;top:calc(env(safe-area-inset-top,44px) + 6px);right:12px;z-index:201;font-size:10px;font-weight:700;color:var(--t3);font-family:var(--font);letter-spacing:.3px;pointer-events:none;"></div>
 <div class="ac" id="AC">
 
 <!-- SETUP -->
@@ -1446,6 +1447,7 @@ body{height:100vh;height:100dvh;}
 <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
+<script src="version.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
 /* ═══════════════════════════════════════
@@ -1856,10 +1858,15 @@ function enterApp(){
   applyCSSVarDiet(P.diet||'none');
   markDietSelected(P.diet||'none');
   if(P.gender==='female') rdaGender='female';
-  // Show admin tab if user is admin
+  // Show admin tab and version badge if user is admin
   var adminTab=document.getElementById('tab-admin');
   if(adminTab&&window._ntCurrentUser&&window._ntCurrentUser.role==='admin'){
     adminTab.style.display='flex';
+    var vBadge=document.getElementById('versionBadge');
+    if(vBadge){
+      vBadge.textContent=typeof APP_VERSION!=='undefined'?APP_VERSION:'';
+      vBadge.style.display='block';
+    }
   }
   goTab('home');refreshHome();updateDBBadge();
   startReminderTimers();

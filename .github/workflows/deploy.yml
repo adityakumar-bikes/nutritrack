@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -23,6 +23,21 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Bump version
+        run: |
+          PATCH=$(grep -oP "(?<=v1\.0\.)\d+" version.js)
+          NEW_PATCH=$((PATCH + 1))
+          NEW_VERSION="v1.0.$NEW_PATCH"
+          sed -i "s/v1\.0\.$PATCH/$NEW_VERSION/" version.js
+          echo "Bumped to $NEW_VERSION"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add version.js
+          git diff --staged --quiet || git commit -m "chore: bump to $NEW_VERSION [skip ci]"
+          git push
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -30,7 +45,6 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload the entire repo root (index.html, sw.js, manifest.json, icons/)
           path: '.'
 
       - name: Deploy to GitHub Pages

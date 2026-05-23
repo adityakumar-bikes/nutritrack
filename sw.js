@@ -41,6 +41,7 @@ self.addEventListener('fetch', event => {
   if (request.mode === 'navigate' ||
       url.pathname.endsWith('.html') ||
       url.pathname.endsWith('.js') ||
+      url.pathname.endsWith('version.js') ||
       url.pathname === '/nutritrack/' ||
       url.pathname === '/nutritrack') {
     event.respondWith(
