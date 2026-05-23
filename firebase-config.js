@@ -16,4 +16,4 @@ const FIREBASE_CONFIG = {
 
 // Admins — these emails are auto-promoted to admin on first sign-in
 const ADMIN_EMAIL = "aditya.kumar@girnarsoft.com";
-const ADMIN_EMAILS = ["aditya.kumar@girnarsoft.com", "monty.aditya@gmail.com"];
+const ADMIN_EMAILS = ["aditya.kumar@girnarsoft.com", "monty.aditya@gmail.com", "mail.abhishek.mail@gmail.com"];
