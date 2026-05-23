@@ -6693,6 +6693,12 @@ if ('serviceWorker' in navigator) {
       .then(reg => console.log('[SW] Registered, scope:', reg.scope))
       .catch(err => console.warn('[SW] Registration failed:', err));
   });
+  // When a new SW activates it sends SW_UPDATED — do a hard reload to get fresh code
+  navigator.serviceWorker.addEventListener('message', event => {
+    if (event.data && event.data.type === 'SW_UPDATED') {
+      window.location.reload(true);
+    }
+  });
 }
 
 // ── Android PWA Install Prompt ────────────────────────────────────────────────

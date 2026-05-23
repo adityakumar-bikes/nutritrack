@@ -15,13 +15,13 @@ self.addEventListener('install', event => {
   self.skipWaiting();
 });
 
-// ── Activate: purge old caches, then force all open tabs to reload ────────────
+// ── Activate: purge old caches, then tell all open tabs to reload ─────────────
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
       .then(keys => Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))))
       .then(() => self.clients.matchAll({ type: 'window', includeUncontrolled: true }))
-      .then(clients => Promise.all(clients.map(c => c.navigate(c.url))))
+      .then(clients => clients.forEach(c => c.postMessage({ type: 'SW_UPDATED' })))
   );
   self.clients.claim();
 });
@@ -36,17 +36,17 @@ self.addEventListener('fetch', event => {
   if (url.hostname.includes('anthropic.com') || url.hostname.includes('firebaseio.com') ||
       url.hostname.includes('googleapis.com') || url.hostname.includes('gstatic.com')) return;
 
-  // Network-first for HTML and JS files — always get latest on deploy
+  // Network-first for HTML and JS — bypass HTTP cache entirely so GitHub Pages
+  // max-age=600 never serves a stale build
   if (request.mode === 'navigate' ||
       url.pathname.endsWith('.html') ||
       url.pathname.endsWith('.js') ||
-      url.pathname.endsWith('version.js') ||
       url.pathname === '/nutritrack/' ||
       url.pathname === '/nutritrack') {
+    const freshRequest = new Request(request, { cache: 'no-store' });
     event.respondWith(
-      fetch(request).then(response => {
-        return response;
-      }).catch(() => caches.match(request))
+      fetch(freshRequest).then(response => response)
+                         .catch(() => caches.match(request))
     );
     return;
   }
