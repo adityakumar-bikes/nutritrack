@@ -1236,6 +1236,105 @@ body{height:100vh;height:100dvh;}
     </div>
   </div>
 
+<!-- ADMIN PANEL -->
+<div class="screen" id="screen-admin">
+  <div class="admin-wrap">
+    <div class="admin-h">Admin Panel</div>
+    <div class="admin-badge">🛡️ Admin Access</div>
+
+    <!-- API Key -->
+    <div class="admin-sec">Anthropic API Key</div>
+    <div class="admin-card">
+      <p style="font-size:12px;color:var(--t2);margin-bottom:12px;line-height:1.6">This key is shared across all approved users. Stored securely in Firestore — never exposed in the app code.</p>
+      <div class="admin-key-row">
+        <input class="admin-key-inp" type="password" id="adminKeyInp" placeholder="sk-ant-api03-…" autocomplete="off" autocorrect="off" spellcheck="false">
+        <button class="admin-key-btn" onclick="saveApiKey()" type="button">Save</button>
+      </div>
+      <div id="adminKeyStatus" style="font-size:12px;margin-top:8px;color:var(--t3)"></div>
+    </div>
+
+    <!-- Overview Stats -->
+    <div class="admin-sec">Overview</div>
+    <div class="admin-stats-row" id="adminStatsRow">
+      <div class="admin-stat"><div class="admin-stat-v" id="statTotal">—</div><div class="admin-stat-l">Total Users</div></div>
+      <div class="admin-stat"><div class="admin-stat-v" id="statActive7" style="color:#30d158">—</div><div class="admin-stat-l">Active 7d</div></div>
+      <div class="admin-stat"><div class="admin-stat-v" id="statPending" style="color:#ffd60a">—</div><div class="admin-stat-l">Pending</div></div>
+    </div>
+    <div class="admin-stats-row" style="margin-top:8px">
+      <div class="admin-stat"><div class="admin-stat-v" id="statLogsToday" style="color:#0a84ff">—</div><div class="admin-stat-l">Logs Today</div></div>
+      <div class="admin-stat"><div class="admin-stat-v" id="statAvgCal" style="color:#ff6b35">—</div><div class="admin-stat-l">Avg kcal/day</div></div>
+      <div class="admin-stat"><div class="admin-stat-v" id="statAdmins" style="color:#ffd60a">—</div><div class="admin-stat-l">Admins</div></div>
+    </div>
+
+    <!-- Analytics Charts -->
+    <div class="admin-sec">Analytics</div>
+    <div class="admin-charts-grid">
+      <!-- Gender split -->
+      <div class="admin-chart-card">
+        <div class="admin-chart-title">Gender Split</div>
+        <div id="adminGenderChart" class="admin-donut-wrap"></div>
+      </div>
+      <!-- Diet distribution -->
+      <div class="admin-chart-card">
+        <div class="admin-chart-title">Diet Types</div>
+        <div id="adminDietChart" class="admin-donut-wrap"></div>
+      </div>
+    </div>
+
+    <!-- City Distribution -->
+    <div class="admin-card" style="margin-top:8px">
+      <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:12px">City Distribution</div>
+      <div id="adminCityBars"></div>
+    </div>
+
+    <!-- Fitness Goal Distribution -->
+    <div class="admin-card" style="margin-top:8px">
+      <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:12px">Fitness Goals</div>
+      <div id="adminGoalBars"></div>
+    </div>
+
+    <!-- Regional Nutrition Analytics -->
+    <div class="admin-sec">Regional Nutrition (by State)</div>
+    <!-- Region filter pills -->
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px" id="adminRegionPills">
+      <button class="admin-region-pill active" onclick="showRegionTab('all',this)">All India</button>
+      <button class="admin-region-pill" onclick="showRegionTab('north',this)">North</button>
+      <button class="admin-region-pill" onclick="showRegionTab('south',this)">South</button>
+      <button class="admin-region-pill" onclick="showRegionTab('west',this)">West</button>
+      <button class="admin-region-pill" onclick="showRegionTab('east',this)">East</button>
+      <button class="admin-region-pill" onclick="showRegionTab('northeast',this)">North East</button>
+      <button class="admin-region-pill" onclick="showRegionTab('central',this)">Central</button>
+    </div>
+    <!-- Protein by state/region -->
+    <div class="admin-card">
+      <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:12px">🥩 Avg Daily Protein by State</div>
+      <div id="adminProteinRegion"></div>
+    </div>
+    <!-- B12 by state/region -->
+    <div class="admin-card" style="margin-top:8px">
+      <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px">💊 Avg Daily Vit B12 by State</div>
+      <div style="font-size:10px;color:var(--t3);margin-bottom:10px">RDA: 2.4 µg/day · Red = below 50% RDA · Amber = 50–80% · Green = adequate</div>
+      <div id="adminB12Region"></div>
+    </div>
+    <!-- Calories by state/region -->
+    <div class="admin-card" style="margin-top:8px">
+      <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:12px">🔥 Avg Daily Calories by State</div>
+      <div id="adminCalRegion"></div>
+    </div>
+
+    <!-- Pending Requests -->
+    <div class="admin-sec">Pending Requests</div>
+    <div id="adminPendingList"><div class="admin-loading">Loading…</div></div>
+
+    <!-- All Users -->
+    <div class="admin-sec" style="display:flex;align-items:center;justify-content:space-between">
+      <span>All Users</span>
+      <input id="adminUserSearch" type="text" placeholder="Search name / email / city…" oninput="filterAdminUsers()" style="background:var(--s2);border:1px solid rgba(0,0,0,.06);border-radius:10px;padding:5px 10px;font-size:12px;color:var(--t);font-family:var(--font);outline:none;width:180px">
+    </div>
+    <div id="adminUserList"><div class="admin-loading">Loading…</div></div>
+  </div>
+</div>
+
 </div><!-- /AC -->
 
 <!-- Edit Nutrients Modal -->
@@ -1481,105 +1580,6 @@ body{height:100vh;height:100dvh;}
   <div class="tab"        id="tab-admin"    onclick="goTab('admin')"    style="display:none"><span class="ti">🛡️</span><span class="tl">Admin</span></div>
 </div>
 <div class="tsafe" id="tSafe" style="display:none"></div>
-
-<!-- ADMIN PANEL -->
-<div class="screen" id="screen-admin">
-  <div class="admin-wrap">
-    <div class="admin-h">Admin Panel</div>
-    <div class="admin-badge">🛡️ Admin Access</div>
-
-    <!-- API Key -->
-    <div class="admin-sec">Anthropic API Key</div>
-    <div class="admin-card">
-      <p style="font-size:12px;color:var(--t2);margin-bottom:12px;line-height:1.6">This key is shared across all approved users. Stored securely in Firestore — never exposed in the app code.</p>
-      <div class="admin-key-row">
-        <input class="admin-key-inp" type="password" id="adminKeyInp" placeholder="sk-ant-api03-…" autocomplete="off" autocorrect="off" spellcheck="false">
-        <button class="admin-key-btn" onclick="saveApiKey()" type="button">Save</button>
-      </div>
-      <div id="adminKeyStatus" style="font-size:12px;margin-top:8px;color:var(--t3)"></div>
-    </div>
-
-    <!-- Overview Stats -->
-    <div class="admin-sec">Overview</div>
-    <div class="admin-stats-row" id="adminStatsRow">
-      <div class="admin-stat"><div class="admin-stat-v" id="statTotal">—</div><div class="admin-stat-l">Total Users</div></div>
-      <div class="admin-stat"><div class="admin-stat-v" id="statActive7" style="color:#30d158">—</div><div class="admin-stat-l">Active 7d</div></div>
-      <div class="admin-stat"><div class="admin-stat-v" id="statPending" style="color:#ffd60a">—</div><div class="admin-stat-l">Pending</div></div>
-    </div>
-    <div class="admin-stats-row" style="margin-top:8px">
-      <div class="admin-stat"><div class="admin-stat-v" id="statLogsToday" style="color:#0a84ff">—</div><div class="admin-stat-l">Logs Today</div></div>
-      <div class="admin-stat"><div class="admin-stat-v" id="statAvgCal" style="color:#ff6b35">—</div><div class="admin-stat-l">Avg kcal/day</div></div>
-      <div class="admin-stat"><div class="admin-stat-v" id="statAdmins" style="color:#ffd60a">—</div><div class="admin-stat-l">Admins</div></div>
-    </div>
-
-    <!-- Analytics Charts -->
-    <div class="admin-sec">Analytics</div>
-    <div class="admin-charts-grid">
-      <!-- Gender split -->
-      <div class="admin-chart-card">
-        <div class="admin-chart-title">Gender Split</div>
-        <div id="adminGenderChart" class="admin-donut-wrap"></div>
-      </div>
-      <!-- Diet distribution -->
-      <div class="admin-chart-card">
-        <div class="admin-chart-title">Diet Types</div>
-        <div id="adminDietChart" class="admin-donut-wrap"></div>
-      </div>
-    </div>
-
-    <!-- City Distribution -->
-    <div class="admin-card" style="margin-top:8px">
-      <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:12px">City Distribution</div>
-      <div id="adminCityBars"></div>
-    </div>
-
-    <!-- Fitness Goal Distribution -->
-    <div class="admin-card" style="margin-top:8px">
-      <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:12px">Fitness Goals</div>
-      <div id="adminGoalBars"></div>
-    </div>
-
-    <!-- Regional Nutrition Analytics -->
-    <div class="admin-sec">Regional Nutrition (by State)</div>
-    <!-- Region filter pills -->
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px" id="adminRegionPills">
-      <button class="admin-region-pill active" onclick="showRegionTab('all',this)">All India</button>
-      <button class="admin-region-pill" onclick="showRegionTab('north',this)">North</button>
-      <button class="admin-region-pill" onclick="showRegionTab('south',this)">South</button>
-      <button class="admin-region-pill" onclick="showRegionTab('west',this)">West</button>
-      <button class="admin-region-pill" onclick="showRegionTab('east',this)">East</button>
-      <button class="admin-region-pill" onclick="showRegionTab('northeast',this)">North East</button>
-      <button class="admin-region-pill" onclick="showRegionTab('central',this)">Central</button>
-    </div>
-    <!-- Protein by state/region -->
-    <div class="admin-card">
-      <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:12px">🥩 Avg Daily Protein by State</div>
-      <div id="adminProteinRegion"></div>
-    </div>
-    <!-- B12 by state/region -->
-    <div class="admin-card" style="margin-top:8px">
-      <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px">💊 Avg Daily Vit B12 by State</div>
-      <div style="font-size:10px;color:var(--t3);margin-bottom:10px">RDA: 2.4 µg/day · Red = below 50% RDA · Amber = 50–80% · Green = adequate</div>
-      <div id="adminB12Region"></div>
-    </div>
-    <!-- Calories by state/region -->
-    <div class="admin-card" style="margin-top:8px">
-      <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:12px">🔥 Avg Daily Calories by State</div>
-      <div id="adminCalRegion"></div>
-    </div>
-
-    <!-- Pending Requests -->
-    <div class="admin-sec">Pending Requests</div>
-    <div id="adminPendingList"><div class="admin-loading">Loading…</div></div>
-
-    <!-- All Users -->
-    <div class="admin-sec" style="display:flex;align-items:center;justify-content:space-between">
-      <span>All Users</span>
-      <input id="adminUserSearch" type="text" placeholder="Search name / email / city…" oninput="filterAdminUsers()" style="background:var(--s2);border:1px solid rgba(0,0,0,.06);border-radius:10px;padding:5px 10px;font-size:12px;color:var(--t);font-family:var(--font);outline:none;width:180px">
-    </div>
-    <div id="adminUserList"><div class="admin-loading">Loading…</div></div>
-  </div>
-</div>
 
 <!-- Firebase SDK (compat v10) -->
 <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
