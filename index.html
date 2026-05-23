@@ -6155,12 +6155,19 @@ async function googleSignIn(){
   errEl.style.display='none';
   btn.disabled=true;
   btn.textContent='Signing in…';
-  var provider = new firebase.auth.GoogleAuthProvider();
-  provider.setCustomParameters({prompt:'select_account'});
+  // Safety timer — always re-enable after 15s in case something hangs silently
+  var safetyTimer = setTimeout(function(){
+    btn.disabled=false; btn.innerHTML=_gBtnSvg;
+  }, 15000);
   try{
+    if(!_fbAuth){ throw new Error('App not ready — please refresh the page'); }
+    var provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({prompt:'select_account'});
     await _fbAuth.signInWithPopup(provider);
     // onAuthStateChanged handles the rest
+    clearTimeout(safetyTimer);
   }catch(e){
+    clearTimeout(safetyTimer);
     // Popup blocked or failed (common on mobile) — silently fall back to redirect
     var popupFailed = e.code==='auth/popup-blocked' || e.code==='auth/network-request-failed' ||
                       e.code==='auth/popup-cancelled' || e.code==='auth/cancelled-popup-request';

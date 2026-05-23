@@ -1,5 +1,5 @@
 // NutriTrack Service Worker
-const CACHE_NAME = 'nutritrack-v2';
+const CACHE_NAME = 'nutritrack-v3';
 
 const STATIC_ASSETS = [
   '/nutritrack/icons/icon-192.png',
