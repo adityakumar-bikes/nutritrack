@@ -623,6 +623,23 @@ body{height:100vh;height:100dvh;}
 .ua-remove{background:rgba(220,38,38,.08);color:#DC2626;}
 .admin-empty{text-align:center;padding:30px 10px;color:var(--t3);font-size:13px;}
 .admin-loading{text-align:center;padding:24px;color:var(--t3);font-size:13px;}
+.admin-charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.admin-chart-card{background:var(--s1);border-radius:16px;padding:14px;border:1px solid rgba(0,0,0,.04);box-shadow:var(--shadow-sm);}
+.admin-chart-title{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px;}
+.admin-donut-wrap{display:flex;flex-direction:column;gap:5px;}
+.admin-donut-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2);}
+.admin-donut-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.admin-donut-bar{flex:1;height:5px;border-radius:3px;background:var(--s3);overflow:hidden;}
+.admin-donut-fill{height:100%;border-radius:3px;transition:width .4s ease;}
+.admin-donut-pct{font-size:10px;font-weight:700;color:var(--t);min-width:28px;text-align:right;}
+.admin-hbar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.admin-hbar-lbl{font-size:12px;color:var(--t2);min-width:90px;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.admin-hbar-track{flex:1;height:7px;border-radius:4px;background:var(--s3);overflow:hidden;}
+.admin-hbar-fill{height:100%;border-radius:4px;transition:width .4s ease;}
+.admin-hbar-cnt{font-size:11px;font-weight:700;color:var(--t);min-width:24px;text-align:right;}
+.ucard-profile-row{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;}
+.ucard-tag{font-size:9px;font-weight:600;padding:2px 7px;border-radius:5px;background:var(--s3);color:var(--t2);}
+.ucard-lastlog{font-size:9px;color:var(--t3);margin-top:3px;}
 
 </style>
 </head>
@@ -1291,6 +1308,7 @@ body{height:100vh;height:100dvh;}
         <div class="modal-row"><span class="modal-row-l">Height</span><div style="display:flex;align-items:center;gap:4px"><input class="modal-inp" id="pHeight" type="number" inputmode="decimal" placeholder="170" oninput="onProfileChange()" style="width:70px"><span class="modal-unit">cm</span></div></div>
         <div class="modal-row"><span class="modal-row-l">Weight</span><div style="display:flex;align-items:center;gap:4px"><input class="modal-inp" id="pWeight" type="number" inputmode="decimal" placeholder="70" oninput="onProfileChange()" style="width:70px"><span class="modal-unit">kg</span></div></div>
         <div class="modal-row"><span class="modal-row-l">Body Fat %</span><div style="display:flex;align-items:center;gap:4px"><input class="modal-inp" id="pBodyFat" type="number" inputmode="decimal" placeholder="20" oninput="onProfileChange()" style="width:70px"><span class="modal-unit">%</span></div></div>
+        <div class="modal-row"><span class="modal-row-l">City</span><input class="modal-inp" id="pCity" type="text" placeholder="e.g. Mumbai" oninput="onProfileChange()" style="width:130px;text-align:right" autocomplete="off"></div>
         <div class="modal-row"><span class="modal-row-l">Activity</span>
           <select id="pActivity" onchange="onProfileChange()" style="background:var(--s3);border:none;outline:none;color:var(--t);font-size:14px;font-weight:600;font-family:var(--font);border-radius:8px;padding:6px 10px;-webkit-appearance:none;cursor:pointer">
             <option value="sedentary">Sedentary</option><option value="light">Light Active</option><option value="moderate">Moderate</option><option value="active">Very Active</option><option value="extreme">Extreme</option>
@@ -1424,12 +1442,44 @@ body{height:100vh;height:100dvh;}
       <div id="adminKeyStatus" style="font-size:12px;margin-top:8px;color:var(--t3)"></div>
     </div>
 
-    <!-- Stats -->
+    <!-- Overview Stats -->
     <div class="admin-sec">Overview</div>
     <div class="admin-stats-row" id="adminStatsRow">
       <div class="admin-stat"><div class="admin-stat-v" id="statTotal">—</div><div class="admin-stat-l">Total Users</div></div>
+      <div class="admin-stat"><div class="admin-stat-v" id="statActive7" style="color:#30d158">—</div><div class="admin-stat-l">Active 7d</div></div>
       <div class="admin-stat"><div class="admin-stat-v" id="statPending" style="color:#ffd60a">—</div><div class="admin-stat-l">Pending</div></div>
+    </div>
+    <div class="admin-stats-row" style="margin-top:8px">
+      <div class="admin-stat"><div class="admin-stat-v" id="statLogsToday" style="color:#0a84ff">—</div><div class="admin-stat-l">Logs Today</div></div>
+      <div class="admin-stat"><div class="admin-stat-v" id="statAvgCal" style="color:#ff6b35">—</div><div class="admin-stat-l">Avg kcal/day</div></div>
       <div class="admin-stat"><div class="admin-stat-v" id="statAdmins" style="color:#ffd60a">—</div><div class="admin-stat-l">Admins</div></div>
+    </div>
+
+    <!-- Analytics Charts -->
+    <div class="admin-sec">Analytics</div>
+    <div class="admin-charts-grid">
+      <!-- Gender split -->
+      <div class="admin-chart-card">
+        <div class="admin-chart-title">Gender Split</div>
+        <div id="adminGenderChart" class="admin-donut-wrap"></div>
+      </div>
+      <!-- Diet distribution -->
+      <div class="admin-chart-card">
+        <div class="admin-chart-title">Diet Types</div>
+        <div id="adminDietChart" class="admin-donut-wrap"></div>
+      </div>
+    </div>
+
+    <!-- City Distribution -->
+    <div class="admin-card" style="margin-top:8px">
+      <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:12px">City Distribution</div>
+      <div id="adminCityBars"></div>
+    </div>
+
+    <!-- Fitness Goal Distribution -->
+    <div class="admin-card" style="margin-top:8px">
+      <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:12px">Fitness Goals</div>
+      <div id="adminGoalBars"></div>
     </div>
 
     <!-- Pending Requests -->
@@ -1437,7 +1487,10 @@ body{height:100vh;height:100dvh;}
     <div id="adminPendingList"><div class="admin-loading">Loading…</div></div>
 
     <!-- All Users -->
-    <div class="admin-sec">All Users</div>
+    <div class="admin-sec" style="display:flex;align-items:center;justify-content:space-between">
+      <span>All Users</span>
+      <input id="adminUserSearch" type="text" placeholder="Search name / email / city…" oninput="filterAdminUsers()" style="background:var(--s2);border:1px solid rgba(0,0,0,.06);border-radius:10px;padding:5px 10px;font-size:12px;color:var(--t);font-family:var(--font);outline:none;width:180px">
+    </div>
     <div id="adminUserList"><div class="admin-loading">Loading…</div></div>
   </div>
 </div>
@@ -1691,7 +1744,7 @@ var DIETS = {
    STATE
 ═══════════════════════════════════════ */
 var G={calories:2000,protein:150,carbs:200,fat:65,fiber:30,burned:0,water:2500};
-var P={name:'',gender:'',age:'',height:'',weight:'',weightTarget:'',fitnessGoal:'',bodyFat:'',activity:'moderate',diet:'none'};
+var P={name:'',gender:'',age:'',height:'',weight:'',weightTarget:'',fitnessGoal:'',bodyFat:'',activity:'moderate',diet:'none',city:''};
 var log=[];var meal='breakfast';var apiKey='';
 var NBase=null;var servings=[];var activeSrv=0;var activeQty=1;
 var NIsLiquid=false; // true when current food is a liquid (juice, milk, etc.)
@@ -1882,6 +1935,8 @@ function enterApp(){
     sessionStorage.removeItem('nv_just_updated');
     setTimeout(function(){showImportToast('✓ App updated to latest version');},600);
   }
+  // Sync profile to Firestore on each login (debounced 2s to let app settle)
+  setTimeout(function(){ syncProfileToFirestore(); }, 2000);
 }
 
 function resetKey(){
@@ -2311,6 +2366,7 @@ function addEntry(name,hasConflict){
     // Add to today's live log
     log.push(entry);
     persist();
+    debouncedSyncDaily();
   } else {
     // Add to historical date
     if(!historyLog[logDateStr]) historyLog[logDateStr]=[];
@@ -4723,6 +4779,7 @@ var PROFILE_FIELDS=[
   {id:'pHeight',  label:'Height',      from:function(){return P.height||'';},      parse:function(v){return v;}},
   {id:'pWeight',  label:'Weight',      from:function(){return P.weight||'';},      parse:function(v){return v;}},
   {id:'pBodyFat', label:'Body Fat %',  from:function(){return P.bodyFat||'';},     parse:function(v){return v;}},
+  {id:'pCity',    label:'City',        from:function(){return P.city||'';},        parse:function(v){return v.trim();}},
   {id:'pActivity',    label:'Activity',       from:function(){return P.activity||'moderate';},    parse:function(v){return v;}},
   {id:'pFitnessGoal', label:'Fitness Goal',   from:function(){return P.fitnessGoal||'';},          parse:function(v){return v;}},
   {id:'pWeightTarget',label:'Target Weight',  from:function(){return P.weightTarget||'';},         parse:function(v){return v;}},
@@ -4811,6 +4868,7 @@ function saveProfileFromModal(){
   P.height=document.getElementById('pHeight').value;
   P.weight=document.getElementById('pWeight').value;
   P.bodyFat=document.getElementById('pBodyFat').value;
+  P.city=document.getElementById('pCity').value.trim();
   P.activity=document.getElementById('pActivity').value;
   P.fitnessGoal=document.getElementById('pFitnessGoal').value;
   P.weightTarget=document.getElementById('pWeightTarget').value;
@@ -4842,6 +4900,7 @@ function saveProfileFromModal(){
   updateGoalDisplays();
   document.getElementById('profileModal').classList.remove('open');
   beep(660,0.1,2,0.25);
+  syncProfileToFirestore();
 }
 
 /* ═══════════════════════════════════════
@@ -6066,6 +6125,9 @@ function refreshAccountWidget(){
 }
 
 /* ─── ADMIN PANEL ─── */
+// ── Admin: cached users for search/filter ────────────────────────────────────
+var _adminAllUsers = [];
+
 async function loadAdminPanel(){
   var pendingEl = document.getElementById('adminPendingList');
   var userEl    = document.getElementById('adminUserList');
@@ -6085,33 +6147,145 @@ async function loadAdminPanel(){
     var snap = await _fbDb.collection('users').orderBy('createdAt','asc').get();
     var allUsers = [];
     snap.forEach(function(d){ allUsers.push(Object.assign({uid:d.id}, d.data())); });
+    _adminAllUsers = allUsers;
 
     var pending  = allUsers.filter(function(u){ return !u.approved; });
     var approved = allUsers.filter(function(u){ return  u.approved; });
     var admins   = allUsers.filter(function(u){ return  u.role==='admin'; });
 
-    document.getElementById('statTotal').textContent   = allUsers.length;
-    document.getElementById('statPending').textContent = pending.length;
-    document.getElementById('statAdmins').textContent  = admins.length;
+    // ── Compute analytics ──────────────────────────────────────────────────
+    var now = Date.now();
+    var ms7 = 7*24*60*60*1000;
+    var active7 = approved.filter(function(u){
+      var ll = u.lastLogin && u.lastLogin.toDate ? u.lastLogin.toDate().getTime() : 0;
+      return (now - ll) < ms7;
+    });
 
-    // Pending list
+    // Avg calories from lastDayLog field (synced by users)
+    var calSamples = approved.filter(function(u){ return u.lastDayCal && u.lastDayCal > 0; });
+    var avgCal = calSamples.length
+      ? Math.round(calSamples.reduce(function(a,u){ return a+u.lastDayCal; },0) / calSamples.length)
+      : 0;
+
+    // Logs today
+    var todayStr = new Date().toDateString();
+    var logsToday = approved.filter(function(u){ return u.lastLogDate === todayStr; }).length;
+
+    // ── Overview stats ──────────────────────────────────────────────────────
+    document.getElementById('statTotal').textContent    = allUsers.length;
+    document.getElementById('statActive7').textContent  = active7.length;
+    document.getElementById('statPending').textContent  = pending.length;
+    document.getElementById('statLogsToday').textContent= logsToday;
+    document.getElementById('statAvgCal').textContent   = avgCal || '—';
+    document.getElementById('statAdmins').textContent   = admins.length;
+
+    // ── Gender chart ────────────────────────────────────────────────────────
+    var genderCounts = {};
+    approved.forEach(function(u){
+      var g = (u.profile && u.profile.gender) || 'unknown';
+      genderCounts[g] = (genderCounts[g]||0) + 1;
+    });
+    var gColors = {male:'#0a84ff',female:'#ff375f',other:'#bf5af2',unknown:'var(--s3)'};
+    var gLabels = {male:'Male',female:'Female',other:'Other',unknown:'Not set'};
+    renderDonutChart('adminGenderChart', genderCounts, gColors, gLabels, approved.length);
+
+    // ── Diet chart ──────────────────────────────────────────────────────────
+    var dietCounts = {};
+    approved.forEach(function(u){
+      var d = (u.profile && u.profile.diet) || 'none';
+      var label = d==='none'?'No Diet':d.charAt(0).toUpperCase()+d.slice(1);
+      dietCounts[label] = (dietCounts[label]||0) + 1;
+    });
+    var dietColors = {'No Diet':'#30d158','Keto':'#ff6b35','Vegan':'#34c759','Vegetarian':'#32ade6','Paleo':'#ffd60a','Carnivore':'#ff453a','Gluten-free':'#bf5af2','Diabetic':'#0a84ff','Other':'#636366'};
+    renderDonutChart('adminDietChart', dietCounts, dietColors, null, approved.length);
+
+    // ── City bars ───────────────────────────────────────────────────────────
+    var cityCounts = {};
+    approved.forEach(function(u){
+      var c = (u.profile && u.profile.city && u.profile.city.trim()) || '';
+      if(c){ var k=c.charAt(0).toUpperCase()+c.slice(1).toLowerCase(); cityCounts[k]=(cityCounts[k]||0)+1; }
+    });
+    renderHBars('adminCityBars', cityCounts, '#0a84ff', 'No city data yet — users need to fill their profile');
+
+    // ── Fitness goal bars ───────────────────────────────────────────────────
+    var goalLabels = {lose_weight:'Lose Weight',body_recomp:'Lose Fat & Gain Muscle',maintain:'Maintain',gain_muscle:'Gain Muscle',gain_weight:'Gain Weight'};
+    var goalCounts = {};
+    approved.forEach(function(u){
+      var g = (u.profile && u.profile.fitnessGoal) || '';
+      if(g){ var label=goalLabels[g]||g; goalCounts[label]=(goalCounts[label]||0)+1; }
+    });
+    renderHBars('adminGoalBars', goalCounts, '#ff6b35', 'No goal data yet');
+
+    // ── Pending list ────────────────────────────────────────────────────────
     if(pending.length === 0){
       pendingEl.innerHTML = '<div class="admin-empty">No pending requests 🎉</div>';
     } else {
       pendingEl.innerHTML = pending.map(function(u){ return renderUserCard(u, true); }).join('');
     }
 
-    // All users
-    if(approved.length === 0){
-      userEl.innerHTML = '<div class="admin-empty">No approved users yet</div>';
-    } else {
-      userEl.innerHTML = approved.map(function(u){ return renderUserCard(u, false); }).join('');
-    }
+    // ── All users ───────────────────────────────────────────────────────────
+    renderAdminUserList(approved);
 
   }catch(e){
     pendingEl.innerHTML = '<div class="admin-empty" style="color:#ff453a">Error: '+e.message+'</div>';
-    userEl.innerHTML = '';
+    userEl.innerHTML = '<div class="admin-empty" style="color:#ff453a">'+e.message+'</div>';
   }
+}
+
+function renderDonutChart(elId, counts, colors, labelMap, total){
+  var el = document.getElementById(elId);
+  if(!el) return;
+  var entries = Object.entries(counts).sort(function(a,b){return b[1]-a[1];});
+  if(!entries.length){ el.innerHTML='<div style="font-size:11px;color:var(--t3)">No data yet</div>'; return; }
+  el.innerHTML = entries.map(function(kv){
+    var key=kv[0], cnt=kv[1];
+    var label = (labelMap&&labelMap[key]) ? labelMap[key] : key;
+    var color = (colors&&colors[key]) ? colors[key] : '#636366';
+    var pct = total>0 ? Math.round(cnt/total*100) : 0;
+    return '<div class="admin-donut-item">'
+      +'<div class="admin-donut-dot" style="background:'+color+'"></div>'
+      +'<span style="flex:1;font-size:11px;color:var(--t2)">'+label+'</span>'
+      +'<div class="admin-donut-bar"><div class="admin-donut-fill" style="width:'+pct+'%;background:'+color+'"></div></div>'
+      +'<span class="admin-donut-pct">'+pct+'%</span>'
+      +'</div>';
+  }).join('');
+}
+
+function renderHBars(elId, counts, color, emptyMsg){
+  var el = document.getElementById(elId);
+  if(!el) return;
+  var entries = Object.entries(counts).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
+  if(!entries.length){ el.innerHTML='<div style="font-size:11px;color:var(--t3)">'+emptyMsg+'</div>'; return; }
+  var max = entries[0][1];
+  el.innerHTML = entries.map(function(kv){
+    var pct = max>0 ? Math.round(kv[1]/max*100) : 0;
+    return '<div class="admin-hbar-row">'
+      +'<div class="admin-hbar-lbl">'+kv[0]+'</div>'
+      +'<div class="admin-hbar-track"><div class="admin-hbar-fill" style="width:'+pct+'%;background:'+color+'"></div></div>'
+      +'<div class="admin-hbar-cnt">'+kv[1]+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function renderAdminUserList(users){
+  var userEl = document.getElementById('adminUserList');
+  if(!userEl) return;
+  if(!users.length){ userEl.innerHTML='<div class="admin-empty">No approved users yet</div>'; return; }
+  userEl.innerHTML = users.map(function(u){ return renderUserCard(u, false); }).join('');
+}
+
+function filterAdminUsers(){
+  var q = (document.getElementById('adminUserSearch').value||'').toLowerCase().trim();
+  var approved = _adminAllUsers.filter(function(u){ return !!u.approved; });
+  if(!q){ renderAdminUserList(approved); return; }
+  var filtered = approved.filter(function(u){
+    var name  = (u.name||'').toLowerCase();
+    var email = (u.email||'').toLowerCase();
+    var city  = (u.profile && u.profile.city ? u.profile.city : '').toLowerCase();
+    var diet  = (u.profile && u.profile.diet ? u.profile.diet : '').toLowerCase();
+    return name.includes(q)||email.includes(q)||city.includes(q)||diet.includes(q);
+  });
+  renderAdminUserList(filtered);
 }
 
 function renderUserCard(u, isPending){
@@ -6121,13 +6295,34 @@ function renderUserCard(u, isPending){
     ? '<img class="ucard-avatar" src="'+u.photo+'" alt="" onerror="this.style.display=\'none\'">'
     : '<div class="ucard-avatar">👤</div>';
   var joined = u.createdAt && u.createdAt.toDate ? u.createdAt.toDate().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '—';
+  var lastSeen = u.lastLogin && u.lastLogin.toDate ? _relTime(u.lastLogin.toDate()) : '—';
+
+  // Build profile tag chips
+  var prof = u.profile || {};
+  var tags = [];
+  if(prof.gender && prof.gender!=='') tags.push(prof.gender.charAt(0).toUpperCase()+prof.gender.slice(1));
+  if(prof.age)    tags.push(prof.age+'y');
+  if(prof.city)   tags.push('📍'+prof.city.charAt(0).toUpperCase()+prof.city.slice(1).toLowerCase());
+  if(prof.weight) tags.push(prof.weight+'kg');
+  if(prof.height) tags.push(prof.height+'cm');
+  var bmi = (prof.height&&prof.weight) ? Math.round(prof.weight/((prof.height/100)*(prof.height/100))*10)/10 : null;
+  if(bmi) tags.push('BMI '+bmi);
+  if(prof.diet&&prof.diet!=='none') tags.push((prof.diet||'').charAt(0).toUpperCase()+(prof.diet||'').slice(1));
+  var goalMap={lose_weight:'Lose Weight',body_recomp:'Recomp',maintain:'Maintain',gain_muscle:'Gain Muscle',gain_weight:'Gain Weight'};
+  if(prof.fitnessGoal) tags.push('🎯 '+(goalMap[prof.fitnessGoal]||prof.fitnessGoal));
+  if(u.lastDayCal) tags.push('🔥'+u.lastDayCal+'kcal');
+
+  var tagsHtml = tags.length
+    ? '<div class="ucard-profile-row">'+tags.map(function(t){return '<span class="ucard-tag">'+t+'</span>';}).join('')+'</div>'
+    : '';
+
   var actions = '';
   if(isPending){
     actions = '<button class="ua-btn ua-approve" onclick="approveUser(\''+u.uid+'\')">✓ Approve</button>'
             + '<button class="ua-btn ua-reject"  onclick="rejectUser(\''+u.uid+'\')">✕ Reject</button>';
   } else if(!isSelf){
     if(isAdmin){
-      actions = '<button class="ua-btn ua-rmadmin" onclick="setUserRole(\''+u.uid+'\',\'user\')">Remove Admin</button>'
+      actions = '<button class="ua-btn ua-rmadmin" onclick="setUserRole(\''+u.uid+'\',\'user\')">Demote</button>'
               + '<button class="ua-btn ua-remove"   onclick="removeUser(\''+u.uid+'\')">Remove</button>';
     } else {
       actions = '<button class="ua-btn ua-mkadmin" onclick="setUserRole(\''+u.uid+'\',\'admin\')">Make Admin</button>'
@@ -6139,15 +6334,29 @@ function renderUserCard(u, isPending){
   var roleHtml = isPending
     ? '<span class="ucard-role pending">⏳ Pending</span>'
     : '<span class="ucard-role '+(isAdmin?'admin':'user')+'">'+(isAdmin?'🛡️ Admin':'✅ User')+'</span>';
+
   return '<div class="ucard'+(isPending?' pending-u':'')+'">'
     + avatarHtml
-    + '<div class="ucard-info">'
+    + '<div class="ucard-info" style="min-width:0;flex:1">'
     +   '<div class="ucard-name">'+(u.name||'—')+'</div>'
     +   '<div class="ucard-email">'+(u.email||'—')+'</div>'
-    +   '<div>'+ roleHtml + '<span style="font-size:9px;color:var(--t3);margin-left:6px">Joined '+joined+'</span></div>'
+    +   '<div style="margin-top:3px">'+ roleHtml
+    +     '<span style="font-size:9px;color:var(--t3);margin-left:6px">Joined '+joined+'</span>'
+    +     '<span style="font-size:9px;color:var(--t3);margin-left:6px">· Seen '+lastSeen+'</span>'
+    +   '</div>'
+    +   tagsHtml
     + '</div>'
-    + '<div class="ucard-actions">'+actions+'</div>'
+    + '<div class="ucard-actions" style="flex-direction:column;align-items:flex-end">'+actions+'</div>'
     + '</div>';
+}
+
+function _relTime(date){
+  var diff = Math.floor((Date.now()-date.getTime())/1000);
+  if(diff<60)    return 'just now';
+  if(diff<3600)  return Math.floor(diff/60)+'m ago';
+  if(diff<86400) return Math.floor(diff/3600)+'h ago';
+  if(diff<604800)return Math.floor(diff/86400)+'d ago';
+  return date.toLocaleDateString('en-IN',{day:'numeric',month:'short'});
 }
 
 async function approveUser(uid){
@@ -6210,6 +6419,66 @@ async function saveApiKey(){
     status.textContent = 'Error: ' + e.message;
     status.style.color = '#ff453a';
   }
+}
+
+// ── Profile & Daily Sync to Firestore ────────────────────────────────────────
+async function syncProfileToFirestore(){
+  if(!_fbDb || !window._ntCurrentUser) return;
+  try{
+    var uid = window._ntCurrentUser.uid;
+    await _fbDb.collection('users').doc(uid).update({
+      name: P.name || window._ntCurrentUser.name || '',
+      profile: {
+        name:        P.name||'',
+        gender:      P.gender||'',
+        age:         P.age ? parseInt(P.age)||null : null,
+        height:      P.height ? parseFloat(P.height)||null : null,
+        weight:      P.weight ? parseFloat(P.weight)||null : null,
+        weightTarget:P.weightTarget ? parseFloat(P.weightTarget)||null : null,
+        bodyFat:     P.bodyFat ? parseFloat(P.bodyFat)||null : null,
+        activity:    P.activity||'moderate',
+        fitnessGoal: P.fitnessGoal||'',
+        diet:        P.diet||'none',
+        city:        P.city||''
+      },
+      profileUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  }catch(e){ console.warn('[Sync] syncProfileToFirestore:', e); }
+}
+
+async function syncDailyToFirestore(){
+  if(!_fbDb || !window._ntCurrentUser) return;
+  try{
+    var uid   = window._ntCurrentUser.uid;
+    var today = new Date().toDateString();
+    var t     = totals(log);
+    var dateKey = new Date().toISOString().slice(0,10); // YYYY-MM-DD
+    // Update user's top-level doc with last-log metadata (for admin overview)
+    await _fbDb.collection('users').doc(uid).update({
+      lastLogDate: today,
+      lastDayCal:  Math.round(t.calories||0),
+      lastDayPro:  Math.round(t.protein||0),
+      lastLogin:   firebase.firestore.FieldValue.serverTimestamp()
+    });
+    // Write to subcollection days/{YYYY-MM-DD} for historical analytics
+    await _fbDb.collection('users').doc(uid).collection('days').doc(dateKey).set({
+      date:    dateKey,
+      cal:     Math.round(t.calories||0),
+      pro:     Math.round(t.protein||0),
+      carbs:   Math.round(t.carbs||0),
+      fat:     Math.round(t.fat||0),
+      fiber:   Math.round(t.fiber||0),
+      entries: log.length,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, {merge:true});
+  }catch(e){ console.warn('[Sync] syncDailyToFirestore:', e); }
+}
+
+// Debounce: don't hammer Firestore on every keystroke / rapid adds
+var _syncDailyTimer = null;
+function debouncedSyncDaily(){
+  if(_syncDailyTimer) clearTimeout(_syncDailyTimer);
+  _syncDailyTimer = setTimeout(function(){ syncDailyToFirestore(); }, 3000);
 }
 
 // ── Service Worker Registration ───────────────────────────────────────────────
