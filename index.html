@@ -5919,7 +5919,7 @@ async function handleSignedInUser(user){
   try{
     var userRef = _fbDb.collection('users').doc(user.uid);
     var userDoc = await userRef.get();
-    var isBootstrapAdmin = user.email === ADMIN_EMAIL;
+    var isBootstrapAdmin = (typeof ADMIN_EMAILS !== 'undefined' ? ADMIN_EMAILS : [ADMIN_EMAIL]).includes(user.email);
 
     if(!userDoc.exists){
       // First time — create user record

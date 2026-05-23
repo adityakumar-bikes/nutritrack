@@ -14,5 +14,6 @@ const FIREBASE_CONFIG = {
   appId:             "1:927858241358:web:ac458b21bc0da5ecdf381f"
 };
 
-// The first admin — this email is auto-promoted on first sign-in
+// Admins — these emails are auto-promoted to admin on first sign-in
 const ADMIN_EMAIL = "aditya.kumar@girnarsoft.com";
+const ADMIN_EMAILS = ["aditya.kumar@girnarsoft.com", "monty.aditya@gmail.com"];
