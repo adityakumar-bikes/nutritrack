@@ -640,6 +640,15 @@ body{height:100vh;height:100dvh;}
 .ucard-profile-row{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;}
 .ucard-tag{font-size:9px;font-weight:600;padding:2px 7px;border-radius:5px;background:var(--s3);color:var(--t2);}
 .ucard-lastlog{font-size:9px;color:var(--t3);margin-top:3px;}
+.admin-region-pill{background:var(--s2);border:1px solid rgba(0,0,0,.06);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:600;color:var(--t2);cursor:pointer;font-family:var(--font);transition:all .15s;}
+.admin-region-pill.active{background:var(--green);border-color:var(--green);color:#fff;}
+.admin-nutri-row{display:flex;align-items:center;gap:8px;margin-bottom:9px;}
+.admin-nutri-lbl{font-size:12px;color:var(--t2);min-width:110px;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.admin-nutri-track{flex:1;height:8px;border-radius:4px;background:var(--s3);overflow:hidden;position:relative;}
+.admin-nutri-fill{height:100%;border-radius:4px;transition:width .4s ease;}
+.admin-nutri-rda{position:absolute;top:0;bottom:0;width:2px;background:rgba(0,0,0,.2);}
+.admin-nutri-val{font-size:11px;font-weight:700;color:var(--t);min-width:50px;text-align:right;}
+.admin-nutri-n{font-size:9px;color:var(--t3);min-width:30px;text-align:right;}
 
 </style>
 </head>
@@ -1309,6 +1318,54 @@ body{height:100vh;height:100dvh;}
         <div class="modal-row"><span class="modal-row-l">Weight</span><div style="display:flex;align-items:center;gap:4px"><input class="modal-inp" id="pWeight" type="number" inputmode="decimal" placeholder="70" oninput="onProfileChange()" style="width:70px"><span class="modal-unit">kg</span></div></div>
         <div class="modal-row"><span class="modal-row-l">Body Fat %</span><div style="display:flex;align-items:center;gap:4px"><input class="modal-inp" id="pBodyFat" type="number" inputmode="decimal" placeholder="20" oninput="onProfileChange()" style="width:70px"><span class="modal-unit">%</span></div></div>
         <div class="modal-row"><span class="modal-row-l">City</span><input class="modal-inp" id="pCity" type="text" placeholder="e.g. Mumbai" oninput="onProfileChange()" style="width:130px;text-align:right" autocomplete="off"></div>
+        <div class="modal-row"><span class="modal-row-l">State</span>
+          <select id="pState" onchange="onProfileChange()" style="background:var(--s3);border:none;outline:none;color:var(--t);font-size:13px;font-weight:600;font-family:var(--font);border-radius:8px;padding:6px 10px;-webkit-appearance:none;cursor:pointer;max-width:150px">
+            <option value="">Select State</option>
+            <optgroup label="North India">
+              <option value="Delhi">Delhi</option>
+              <option value="Haryana">Haryana</option>
+              <option value="Himachal Pradesh">Himachal Pradesh</option>
+              <option value="Jammu &amp; Kashmir">Jammu &amp; Kashmir</option>
+              <option value="Punjab">Punjab</option>
+              <option value="Rajasthan">Rajasthan</option>
+              <option value="Uttarakhand">Uttarakhand</option>
+              <option value="Uttar Pradesh">Uttar Pradesh</option>
+            </optgroup>
+            <optgroup label="West India">
+              <option value="Goa">Goa</option>
+              <option value="Gujarat">Gujarat</option>
+              <option value="Maharashtra">Maharashtra</option>
+            </optgroup>
+            <optgroup label="South India">
+              <option value="Andhra Pradesh">Andhra Pradesh</option>
+              <option value="Karnataka">Karnataka</option>
+              <option value="Kerala">Kerala</option>
+              <option value="Puducherry">Puducherry</option>
+              <option value="Tamil Nadu">Tamil Nadu</option>
+              <option value="Telangana">Telangana</option>
+            </optgroup>
+            <optgroup label="East India">
+              <option value="Bihar">Bihar</option>
+              <option value="Jharkhand">Jharkhand</option>
+              <option value="Odisha">Odisha</option>
+              <option value="West Bengal">West Bengal</option>
+            </optgroup>
+            <optgroup label="North East India">
+              <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+              <option value="Assam">Assam</option>
+              <option value="Manipur">Manipur</option>
+              <option value="Meghalaya">Meghalaya</option>
+              <option value="Mizoram">Mizoram</option>
+              <option value="Nagaland">Nagaland</option>
+              <option value="Sikkim">Sikkim</option>
+              <option value="Tripura">Tripura</option>
+            </optgroup>
+            <optgroup label="Central India">
+              <option value="Chhattisgarh">Chhattisgarh</option>
+              <option value="Madhya Pradesh">Madhya Pradesh</option>
+            </optgroup>
+          </select>
+        </div>
         <div class="modal-row"><span class="modal-row-l">Activity</span>
           <select id="pActivity" onchange="onProfileChange()" style="background:var(--s3);border:none;outline:none;color:var(--t);font-size:14px;font-weight:600;font-family:var(--font);border-radius:8px;padding:6px 10px;-webkit-appearance:none;cursor:pointer">
             <option value="sedentary">Sedentary</option><option value="light">Light Active</option><option value="moderate">Moderate</option><option value="active">Very Active</option><option value="extreme">Extreme</option>
@@ -1480,6 +1537,35 @@ body{height:100vh;height:100dvh;}
     <div class="admin-card" style="margin-top:8px">
       <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:12px">Fitness Goals</div>
       <div id="adminGoalBars"></div>
+    </div>
+
+    <!-- Regional Nutrition Analytics -->
+    <div class="admin-sec">Regional Nutrition (by State)</div>
+    <!-- Region filter pills -->
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px" id="adminRegionPills">
+      <button class="admin-region-pill active" onclick="showRegionTab('all',this)">All India</button>
+      <button class="admin-region-pill" onclick="showRegionTab('north',this)">North</button>
+      <button class="admin-region-pill" onclick="showRegionTab('south',this)">South</button>
+      <button class="admin-region-pill" onclick="showRegionTab('west',this)">West</button>
+      <button class="admin-region-pill" onclick="showRegionTab('east',this)">East</button>
+      <button class="admin-region-pill" onclick="showRegionTab('northeast',this)">North East</button>
+      <button class="admin-region-pill" onclick="showRegionTab('central',this)">Central</button>
+    </div>
+    <!-- Protein by state/region -->
+    <div class="admin-card">
+      <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:12px">🥩 Avg Daily Protein by State</div>
+      <div id="adminProteinRegion"></div>
+    </div>
+    <!-- B12 by state/region -->
+    <div class="admin-card" style="margin-top:8px">
+      <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px">💊 Avg Daily Vit B12 by State</div>
+      <div style="font-size:10px;color:var(--t3);margin-bottom:10px">RDA: 2.4 µg/day · Red = below 50% RDA · Amber = 50–80% · Green = adequate</div>
+      <div id="adminB12Region"></div>
+    </div>
+    <!-- Calories by state/region -->
+    <div class="admin-card" style="margin-top:8px">
+      <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:12px">🔥 Avg Daily Calories by State</div>
+      <div id="adminCalRegion"></div>
     </div>
 
     <!-- Pending Requests -->
@@ -1744,7 +1830,7 @@ var DIETS = {
    STATE
 ═══════════════════════════════════════ */
 var G={calories:2000,protein:150,carbs:200,fat:65,fiber:30,burned:0,water:2500};
-var P={name:'',gender:'',age:'',height:'',weight:'',weightTarget:'',fitnessGoal:'',bodyFat:'',activity:'moderate',diet:'none',city:''};
+var P={name:'',gender:'',age:'',height:'',weight:'',weightTarget:'',fitnessGoal:'',bodyFat:'',activity:'moderate',diet:'none',city:'',state:''};
 var log=[];var meal='breakfast';var apiKey='';
 var NBase=null;var servings=[];var activeSrv=0;var activeQty=1;
 var NIsLiquid=false; // true when current food is a liquid (juice, milk, etc.)
@@ -4780,6 +4866,7 @@ var PROFILE_FIELDS=[
   {id:'pWeight',  label:'Weight',      from:function(){return P.weight||'';},      parse:function(v){return v;}},
   {id:'pBodyFat', label:'Body Fat %',  from:function(){return P.bodyFat||'';},     parse:function(v){return v;}},
   {id:'pCity',    label:'City',        from:function(){return P.city||'';},        parse:function(v){return v.trim();}},
+  {id:'pState',   label:'State',       from:function(){return P.state||'';},       parse:function(v){return v;}},
   {id:'pActivity',    label:'Activity',       from:function(){return P.activity||'moderate';},    parse:function(v){return v;}},
   {id:'pFitnessGoal', label:'Fitness Goal',   from:function(){return P.fitnessGoal||'';},          parse:function(v){return v;}},
   {id:'pWeightTarget',label:'Target Weight',  from:function(){return P.weightTarget||'';},         parse:function(v){return v;}},
@@ -4869,6 +4956,7 @@ function saveProfileFromModal(){
   P.weight=document.getElementById('pWeight').value;
   P.bodyFat=document.getElementById('pBodyFat').value;
   P.city=document.getElementById('pCity').value.trim();
+  P.state=document.getElementById('pState').value;
   P.activity=document.getElementById('pActivity').value;
   P.fitnessGoal=document.getElementById('pFitnessGoal').value;
   P.weightTarget=document.getElementById('pWeightTarget').value;
@@ -6125,8 +6213,104 @@ function refreshAccountWidget(){
 }
 
 /* ─── ADMIN PANEL ─── */
-// ── Admin: cached users for search/filter ────────────────────────────────────
-var _adminAllUsers = [];
+// ── Admin: cached users for search/filter & regional analytics ───────────────
+var _adminAllUsers  = [];
+var _adminRegionData = [];
+
+// State → region mapping
+var REGION_MAP = {
+  'Delhi':'north','Haryana':'north','Himachal Pradesh':'north',
+  'Jammu & Kashmir':'north','Punjab':'north','Rajasthan':'north',
+  'Uttarakhand':'north','Uttar Pradesh':'north',
+  'Goa':'west','Gujarat':'west','Maharashtra':'west',
+  'Andhra Pradesh':'south','Karnataka':'south','Kerala':'south',
+  'Puducherry':'south','Tamil Nadu':'south','Telangana':'south',
+  'Bihar':'east','Jharkhand':'east','Odisha':'east','West Bengal':'east',
+  'Arunachal Pradesh':'northeast','Assam':'northeast','Manipur':'northeast',
+  'Meghalaya':'northeast','Mizoram':'northeast','Nagaland':'northeast',
+  'Sikkim':'northeast','Tripura':'northeast',
+  'Chhattisgarh':'central','Madhya Pradesh':'central'
+};
+
+function showRegionTab(region, btn){
+  document.querySelectorAll('.admin-region-pill').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  renderRegionalNutrition(region);
+}
+
+function renderRegionalNutrition(region){
+  // Filter users by region
+  var users = _adminRegionData.filter(function(u){
+    if(region==='all') return true;
+    var s = u.profile && u.profile.state ? u.profile.state : '';
+    return REGION_MAP[s] === region;
+  });
+
+  // Group by state, compute averages for protein, B12, calories
+  var stateStats = {}; // { stateName: {proSum, b12Sum, calSum, n} }
+  users.forEach(function(u){
+    var s = (u.profile && u.profile.state) ? u.profile.state : '';
+    if(!s) s = '(No state set)';
+    if(!stateStats[s]) stateStats[s]={proSum:0,b12Sum:0,calSum:0,n:0,nb12:0};
+    if(u.lastDayPro){ stateStats[s].proSum+=u.lastDayPro; stateStats[s].n++; }
+    if(u.lastDayB12!==undefined&&u.lastDayB12!==null){ stateStats[s].b12Sum+=u.lastDayB12; stateStats[s].nb12++; }
+    if(u.lastDayCal){ stateStats[s].calSum+=u.lastDayCal; }
+  });
+
+  var noDataMsg = region==='all'
+    ? 'No data yet — users need to log food and set their state in profile'
+    : 'No users from this region have logged food yet';
+
+  // Protein bars (RDA ~50g general, ~60g male)
+  var proEntries = Object.entries(stateStats)
+    .filter(function(kv){return kv[1].n>0;})
+    .map(function(kv){return {state:kv[0], avg:Math.round(kv[1].proSum/kv[1].n), n:kv[1].n};})
+    .sort(function(a,b){return b.avg-a.avg;});
+  renderNutriBars('adminProteinRegion', proEntries, 'avg', 'g', 150, '#ff6b35', noDataMsg);
+
+  // B12 bars (RDA = 2.4 µg)
+  var b12Entries = Object.entries(stateStats)
+    .filter(function(kv){return kv[1].nb12>0;})
+    .map(function(kv){return {state:kv[0], avg:Math.round(kv[1].b12Sum/kv[1].nb12*100)/100, n:kv[1].nb12};})
+    .sort(function(a,b){return b.avg-a.avg;});
+  renderNutriBars('adminB12Region', b12Entries, 'avg', 'µg', 2.4, null, noDataMsg, true);
+
+  // Calorie bars
+  var calEntries = Object.entries(stateStats)
+    .filter(function(kv){return kv[1].n>0;})
+    .map(function(kv){return {state:kv[0], avg:Math.round(kv[1].calSum/kv[1].n), n:kv[1].n};})
+    .sort(function(a,b){return b.avg-a.avg;});
+  renderNutriBars('adminCalRegion', calEntries, 'avg', 'kcal', 2000, '#30d158', noDataMsg);
+}
+
+function renderNutriBars(elId, entries, key, unit, rda, color, emptyMsg, b12Mode){
+  var el = document.getElementById(elId);
+  if(!el) return;
+  if(!entries.length){ el.innerHTML='<div style="font-size:11px;color:var(--t3);padding:4px 0">'+emptyMsg+'</div>'; return; }
+  var maxVal = Math.max.apply(null, entries.map(function(e){return e[key];}));
+  var rdaPct  = rda && maxVal>0 ? Math.min(100, Math.round(rda/maxVal*100)) : 0;
+  el.innerHTML = entries.slice(0,10).map(function(e){
+    var val   = e[key];
+    var pct   = maxVal>0 ? Math.min(100, Math.round(val/maxVal*100)) : 0;
+    var barColor = color;
+    if(b12Mode){
+      // Red < 50% RDA, Amber 50-80%, Green >= 80%
+      barColor = val < rda*0.5 ? '#ff453a' : val < rda*0.8 ? '#ffd60a' : '#30d158';
+    }
+    var rdaLine = rda && maxVal>0
+      ? '<div class="admin-nutri-rda" style="left:'+rdaPct+'%"></div>'
+      : '';
+    return '<div class="admin-nutri-row">'
+      +'<div class="admin-nutri-lbl">'+e.state+'</div>'
+      +'<div class="admin-nutri-track">'
+      +  '<div class="admin-nutri-fill" style="width:'+pct+'%;background:'+barColor+'"></div>'
+      +  rdaLine
+      +'</div>'
+      +'<div class="admin-nutri-val">'+val+' '+unit+'</div>'
+      +'<div class="admin-nutri-n">('+e.n+')</div>'
+      +'</div>';
+  }).join('');
+}
 
 async function loadAdminPanel(){
   var pendingEl = document.getElementById('adminPendingList');
@@ -6216,6 +6400,10 @@ async function loadAdminPanel(){
     });
     renderHBars('adminGoalBars', goalCounts, '#ff6b35', 'No goal data yet');
 
+    // ── Regional nutrition (uses lastDay* fields from top-level user doc) ──
+    _adminRegionData = approved; // cache for filter tabs
+    renderRegionalNutrition('all');
+
     // ── Pending list ────────────────────────────────────────────────────────
     if(pending.length === 0){
       pendingEl.innerHTML = '<div class="admin-empty">No pending requests 🎉</div>';
@@ -6282,8 +6470,9 @@ function filterAdminUsers(){
     var name  = (u.name||'').toLowerCase();
     var email = (u.email||'').toLowerCase();
     var city  = (u.profile && u.profile.city ? u.profile.city : '').toLowerCase();
+    var state = (u.profile && u.profile.state ? u.profile.state : '').toLowerCase();
     var diet  = (u.profile && u.profile.diet ? u.profile.diet : '').toLowerCase();
-    return name.includes(q)||email.includes(q)||city.includes(q)||diet.includes(q);
+    return name.includes(q)||email.includes(q)||city.includes(q)||state.includes(q)||diet.includes(q);
   });
   renderAdminUserList(filtered);
 }
@@ -6302,7 +6491,7 @@ function renderUserCard(u, isPending){
   var tags = [];
   if(prof.gender && prof.gender!=='') tags.push(prof.gender.charAt(0).toUpperCase()+prof.gender.slice(1));
   if(prof.age)    tags.push(prof.age+'y');
-  if(prof.city)   tags.push('📍'+prof.city.charAt(0).toUpperCase()+prof.city.slice(1).toLowerCase());
+  if(prof.city||prof.state) tags.push('📍'+(prof.city?prof.city.charAt(0).toUpperCase()+prof.city.slice(1).toLowerCase():'')+(prof.city&&prof.state?', ':'')+( prof.state||''));
   if(prof.weight) tags.push(prof.weight+'kg');
   if(prof.height) tags.push(prof.height+'cm');
   var bmi = (prof.height&&prof.weight) ? Math.round(prof.weight/((prof.height/100)*(prof.height/100))*10)/10 : null;
@@ -6439,7 +6628,8 @@ async function syncProfileToFirestore(){
         activity:    P.activity||'moderate',
         fitnessGoal: P.fitnessGoal||'',
         diet:        P.diet||'none',
-        city:        P.city||''
+        city:        P.city||'',
+        state:       P.state||''
       },
       profileUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
@@ -6458,18 +6648,26 @@ async function syncDailyToFirestore(){
       lastLogDate: today,
       lastDayCal:  Math.round(t.calories||0),
       lastDayPro:  Math.round(t.protein||0),
+      lastDayB12:  Math.round((t.vitamin_b12||0)*10)/10,
       lastLogin:   firebase.firestore.FieldValue.serverTimestamp()
     });
     // Write to subcollection days/{YYYY-MM-DD} for historical analytics
     await _fbDb.collection('users').doc(uid).collection('days').doc(dateKey).set({
-      date:    dateKey,
-      cal:     Math.round(t.calories||0),
-      pro:     Math.round(t.protein||0),
-      carbs:   Math.round(t.carbs||0),
-      fat:     Math.round(t.fat||0),
-      fiber:   Math.round(t.fiber||0),
-      entries: log.length,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      date:       dateKey,
+      cal:        Math.round(t.calories||0),
+      pro:        Math.round(t.protein||0),
+      carbs:      Math.round(t.carbs||0),
+      fat:        Math.round(t.fat||0),
+      fiber:      Math.round(t.fiber||0),
+      sugar:      Math.round(t.sugar||0),
+      sodium:     Math.round(t.sodium||0),
+      calcium:    Math.round(t.calcium||0),
+      iron:       Math.round((t.iron||0)*10)/10,
+      vitamin_c:  Math.round(t.vitamin_c||0),
+      vitamin_b12:Math.round((t.vitamin_b12||0)*10)/10,
+      potassium:  Math.round(t.potassium||0),
+      entries:    log.length,
+      updatedAt:  firebase.firestore.FieldValue.serverTimestamp()
     }, {merge:true});
   }catch(e){ console.warn('[Sync] syncDailyToFirestore:', e); }
 }
