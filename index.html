@@ -1594,7 +1594,7 @@ body{height:100vh;height:100dvh;}
    Bump APP_VERSION string on every deploy.
    localStorage data is NEVER touched here.
 ═══════════════════════════════════════ */
-var APP_VERSION='20260419-1';
+// APP_VERSION is declared by version.js (const) — do not re-declare here
 (function(){
   try{
     var stored=localStorage.getItem('nv_ver');
