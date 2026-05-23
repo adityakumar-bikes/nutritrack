@@ -15,14 +15,13 @@ self.addEventListener('install', event => {
   self.skipWaiting();
 });
 
-// ── Activate: purge old caches ────────────────────────────────────────────────
+// ── Activate: purge old caches, then force all open tabs to reload ────────────
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
-      )
-    )
+    caches.keys()
+      .then(keys => Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))))
+      .then(() => self.clients.matchAll({ type: 'window', includeUncontrolled: true }))
+      .then(clients => Promise.all(clients.map(c => c.navigate(c.url))))
   );
   self.clients.claim();
 });
