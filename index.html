@@ -370,6 +370,33 @@ body{height:100vh;height:100dvh;}
 .modal-unit{font-size:12px;color:var(--t2);margin-left:4px;}
 .modal-save{width:100%;background:var(--green);border-radius:14px;padding:15px;border:none;color:#fff;font-size:16px;font-weight:700;cursor:pointer;font-family:var(--font);box-shadow:0 6px 16px rgba(22,163,74,.22);}
 
+/* ── ONBOARDING ── */
+.onboard-overlay{position:fixed;inset:0;background:rgba(10,18,14,.82);z-index:2000;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
+.onboard-overlay.open{display:flex;}
+.onboard-sheet{background:var(--bg);border-radius:28px 28px 0 0;width:100%;max-width:480px;overflow:hidden;padding-bottom:env(safe-area-inset-bottom,0px);}
+.onboard-handle{width:38px;height:4px;background:rgba(0,0,0,.15);border-radius:2px;margin:14px auto 0;}
+.onboard-slides-wrap{overflow:hidden;}
+.onboard-slides{display:flex;transition:transform .38s cubic-bezier(.4,0,.2,1);}
+.onboard-slide{min-width:100%;padding:28px 28px 8px;display:flex;flex-direction:column;align-items:center;text-align:center;}
+.onboard-emoji{font-size:68px;line-height:1;margin-bottom:20px;filter:drop-shadow(0 4px 12px rgba(0,0,0,.15));}
+.onboard-h{font-size:24px;font-weight:800;color:var(--t);letter-spacing:-.4px;margin-bottom:10px;}
+.onboard-p{font-size:15px;color:var(--t2);line-height:1.75;max-width:290px;}
+.onboard-action{margin-top:16px;background:rgba(22,163,74,.12);border:1.5px solid rgba(22,163,74,.3);border-radius:12px;padding:10px 24px;color:var(--green);font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);}
+.onboard-dots{display:flex;gap:6px;justify-content:center;padding:20px 0 16px;}
+.onboard-dot{width:6px;height:6px;border-radius:3px;background:var(--s3);transition:all .28s cubic-bezier(.4,0,.2,1);}
+.onboard-dot.active{width:24px;background:var(--green);}
+.onboard-footer{display:flex;align-items:center;gap:10px;padding:0 24px 24px;}
+.onboard-next{flex:1;background:var(--green);border:none;border-radius:14px;padding:15px;color:#fff;font-size:16px;font-weight:700;cursor:pointer;font-family:var(--font);box-shadow:0 6px 16px rgba(22,163,74,.25);}
+.onboard-skip{background:none;border:none;padding:12px 10px;color:var(--t3);font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font);white-space:nowrap;}
+
+/* ── PROFILE INCOMPLETE BANNER ── */
+.profile-banner{margin:12px 16px 0;background:rgba(255,159,10,.1);border:1.5px solid rgba(255,159,10,.3);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;}
+.profile-banner-icon{font-size:24px;flex-shrink:0;}
+.profile-banner-text{flex:1;}
+.profile-banner-title{font-size:14px;font-weight:700;color:var(--t);margin-bottom:2px;}
+.profile-banner-sub{font-size:12px;color:var(--t2);line-height:1.5;}
+.profile-banner-btn{background:var(--yellow);border:none;border-radius:10px;padding:8px 14px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);flex-shrink:0;}
+
 /* ── AI COACH CARD ── */
 .coach-card{background:linear-gradient(135deg,#FFFFFF 0%,#FAF5FF 60%,#EEF2FF 100%);border-radius:24px;padding:20px 22px;margin-bottom:14px;border:1px solid rgba(139,92,246,.18);position:relative;touch-action:pan-y;box-shadow:0 10px 32px rgba(139,92,246,.12),0 2px 6px rgba(15,23,20,.04);overflow:hidden;}
 .coach-card::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:radial-gradient(circle,rgba(139,92,246,.18),transparent 70%);pointer-events:none;border-radius:50%;}
@@ -701,6 +728,15 @@ body{height:100vh;height:100dvh;}
     <div class="hero-diet" id="heroDiet" style="display:none"></div>
   </div>
   <div id="homeDietAlert"></div>
+  <!-- Profile incomplete banner -->
+  <div id="profileIncompleteBanner" class="profile-banner" style="display:none">
+    <div class="profile-banner-icon">👤</div>
+    <div class="profile-banner-text">
+      <div class="profile-banner-title">Complete your profile</div>
+      <div class="profile-banner-sub">Add your age, weight & goal for personalised calorie and macro targets.</div>
+    </div>
+    <button class="profile-banner-btn" onclick="openProfileModal()" type="button">Set Up →</button>
+  </div>
   <div class="ring-card">
     <div class="ring-hdr">
       <span class="ring-lbl">Daily Goal</span>
@@ -1337,6 +1373,59 @@ body{height:100vh;height:100dvh;}
 </div>
 
 </div><!-- /AC -->
+
+<!-- ONBOARDING WALKTHROUGH -->
+<div id="onboardOverlay" class="onboard-overlay">
+  <div class="onboard-sheet">
+    <div class="onboard-handle"></div>
+    <div class="onboard-slides-wrap">
+      <div class="onboard-slides" id="onboardSlides">
+
+        <!-- Slide 1: Welcome -->
+        <div class="onboard-slide">
+          <div class="onboard-emoji">🥗</div>
+          <div class="onboard-h">Welcome to NutriTrack!</div>
+          <div class="onboard-p">Your AI-powered nutrition companion. Track meals, hit your goals, and understand exactly what your body needs — all in one place.</div>
+        </div>
+
+        <!-- Slide 2: Profile -->
+        <div class="onboard-slide">
+          <div class="onboard-emoji">👤</div>
+          <div class="onboard-h">Set up your profile first</div>
+          <div class="onboard-p">Your age, weight, height and goal let us calculate personalised calorie targets and macro splits — without this, the numbers are just defaults.</div>
+          <button class="onboard-action" onclick="openProfileFromOnboard()" type="button">Open Profile →</button>
+        </div>
+
+        <!-- Slide 3: Log meals -->
+        <div class="onboard-slide">
+          <div class="onboard-emoji">➕</div>
+          <div class="onboard-h">Log meals with AI</div>
+          <div class="onboard-p">Tap <b>Add</b> and describe what you ate — "2 rotis with dal and sabzi" or "chicken sandwich". The AI breaks it down into calories, protein, carbs and fat instantly.</div>
+        </div>
+
+        <!-- Slide 4: Insights -->
+        <div class="onboard-slide">
+          <div class="onboard-emoji">📊</div>
+          <div class="onboard-h">Watch your progress</div>
+          <div class="onboard-p">The <b>Insights</b> tab shows weekly trends, your macro split, logging streaks, and whether you're on track for your weight goal.</div>
+        </div>
+
+        <!-- Slide 5: Ready -->
+        <div class="onboard-slide">
+          <div class="onboard-emoji">🚀</div>
+          <div class="onboard-h">You're all set!</div>
+          <div class="onboard-p">Your data syncs securely to the cloud — switch devices, never lose your history. Your first log is just a tap away. Let's go!</div>
+        </div>
+
+      </div>
+    </div>
+    <div class="onboard-dots" id="onboardDots"></div>
+    <div class="onboard-footer">
+      <button class="onboard-skip" id="onboardSkipBtn" onclick="skipOnboarding()" type="button">Skip</button>
+      <button class="onboard-next" id="onboardNextBtn" onclick="nextOnboardSlide()" type="button">Next →</button>
+    </div>
+  </div>
+</div>
 
 <!-- Edit Nutrients Modal -->
 <div class="edit-modal-overlay" id="editNutriModal" onclick="closeEditModal(event)">
@@ -2024,6 +2113,8 @@ function enterApp(){
   }
   // Sync profile to Firestore on each login (debounced 2s to let app settle)
   setTimeout(function(){ syncProfileToFirestore(); }, 2000);
+  // First-login walkthrough + profile banner
+  checkFirstLogin();
 }
 
 function resetKey(){
@@ -4990,6 +5081,8 @@ function saveProfileFromModal(){
   document.getElementById('profileModal').classList.remove('open');
   beep(660,0.1,2,0.25);
   syncProfileToFirestore();
+  // Hide incomplete profile banner if now complete
+  checkProfileBanner();
 }
 
 /* ═══════════════════════════════════════
@@ -6318,6 +6411,81 @@ function renderNutriBars(elId, entries, key, unit, rda, color, emptyMsg, b12Mode
       +'<div class="admin-nutri-n">('+e.n+')</div>'
       +'</div>';
   }).join('');
+}
+
+/* ═══════════════════════════════════════
+   ONBOARDING WALKTHROUGH
+═══════════════════════════════════════ */
+var _obSlide = 0;
+var _obTotal = 5;
+
+function checkFirstLogin() {
+  // Show/hide the profile incomplete banner every time we enter the app
+  checkProfileBanner();
+  // Show full walkthrough only on very first login
+  if (localStorage.getItem('nt_onboarded')) return;
+  setTimeout(showOnboarding, 700);
+}
+
+function showOnboarding() {
+  _obSlide = 0;
+  var el = document.getElementById('onboardOverlay');
+  if (!el) return;
+  el.classList.add('open');
+  _renderObDots();
+  _updateObSlide();
+}
+
+function _renderObDots() {
+  var wrap = document.getElementById('onboardDots');
+  if (!wrap) return;
+  var html = '';
+  for (var i = 0; i < _obTotal; i++) {
+    html += '<div class="onboard-dot' + (i === _obSlide ? ' active' : '') + '"></div>';
+  }
+  wrap.innerHTML = html;
+}
+
+function _updateObSlide() {
+  var slides = document.getElementById('onboardSlides');
+  if (slides) slides.style.transform = 'translateX(-' + (_obSlide * 100) + '%)';
+  _renderObDots();
+  var nextBtn = document.getElementById('onboardNextBtn');
+  var skipBtn = document.getElementById('onboardSkipBtn');
+  var isLast = _obSlide === _obTotal - 1;
+  if (nextBtn) nextBtn.textContent = isLast ? "Let's go! 🚀" : 'Next →';
+  if (skipBtn) skipBtn.style.visibility = isLast ? 'hidden' : 'visible';
+}
+
+function nextOnboardSlide() {
+  if (_obSlide < _obTotal - 1) {
+    _obSlide++;
+    _updateObSlide();
+  } else {
+    completeOnboarding();
+  }
+}
+
+function openProfileFromOnboard() {
+  // Advance to next slide then open the profile modal
+  if (_obSlide < _obTotal - 1) { _obSlide++; _updateObSlide(); }
+  setTimeout(openProfileModal, 380);
+}
+
+function skipOnboarding() { completeOnboarding(); }
+
+function completeOnboarding() {
+  localStorage.setItem('nt_onboarded', '1');
+  var el = document.getElementById('onboardOverlay');
+  if (el) el.classList.remove('open');
+  checkProfileBanner();
+}
+
+function checkProfileBanner() {
+  var banner = document.getElementById('profileIncompleteBanner');
+  if (!banner) return;
+  var incomplete = !P.name || !P.age || !P.weight || !P.height;
+  banner.style.display = incomplete ? 'flex' : 'none';
 }
 
 async function loadAdminPanel(){
