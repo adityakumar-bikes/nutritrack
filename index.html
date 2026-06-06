@@ -389,6 +389,32 @@ body{height:100vh;height:100dvh;}
 .onboard-next{flex:1;background:var(--green);border:none;border-radius:14px;padding:15px;color:#fff;font-size:16px;font-weight:700;cursor:pointer;font-family:var(--font);box-shadow:0 6px 16px rgba(22,163,74,.25);}
 .onboard-skip{background:none;border:none;padding:12px 10px;color:var(--t3);font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font);white-space:nowrap;}
 
+/* ── COPY DAY MODAL ── */
+.copy-day-overlay{position:fixed;inset:0;background:rgba(10,18,14,.8);z-index:1500;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}
+.copy-day-overlay.open{display:flex;}
+.copy-day-sheet{background:var(--bg);border-radius:24px 24px 0 0;width:100%;max-width:480px;border-top:2px solid rgba(0,0,0,.08);box-shadow:0 -8px 32px rgba(0,0,0,.15);max-height:82vh;display:flex;flex-direction:column;overflow:hidden;}
+.copy-day-handle{width:38px;height:4px;background:rgba(0,0,0,.15);border-radius:2px;margin:14px auto 0;flex-shrink:0;}
+.copy-day-header{padding:14px 20px 12px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,.07);}
+.copy-day-title{font-size:18px;font-weight:800;color:var(--t);letter-spacing:-.2px;}
+.copy-day-sub{font-size:12px;color:var(--t2);margin-top:3px;line-height:1.5;}
+.copy-day-list{overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1;}
+.copy-day-row{display:flex;align-items:center;gap:12px;padding:13px 20px;cursor:pointer;border-bottom:1px solid rgba(0,0,0,.05);transition:background .12s;}
+.copy-day-row:active{background:var(--s2);}
+.copy-day-row-info{flex:1;min-width:0;}
+.copy-day-row-date{font-size:14px;font-weight:700;color:var(--t);}
+.copy-day-row-meta{font-size:11px;color:var(--t3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.copy-day-row-kcal{font-size:13px;font-weight:700;color:var(--t2);white-space:nowrap;}
+.copy-meal-group{display:flex;align-items:center;gap:12px;padding:13px 20px;border-bottom:1px solid rgba(0,0,0,.05);cursor:pointer;transition:background .12s;}
+.copy-meal-group:active{background:var(--s2);}
+.copy-meal-check{width:22px;height:22px;border-radius:7px;border:2px solid rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
+.copy-meal-check.on{background:var(--green);border-color:var(--green);}
+.copy-meal-info{flex:1;min-width:0;}
+.copy-meal-name{font-size:14px;font-weight:600;color:var(--t);}
+.copy-meal-items{font-size:11px;color:var(--t3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.copy-meal-kcal{font-size:13px;font-weight:700;color:var(--t2);white-space:nowrap;}
+.copy-confirm-btn{width:100%;background:var(--green);border:none;border-radius:14px;padding:15px;color:#fff;font-size:16px;font-weight:700;cursor:pointer;font-family:var(--font);box-shadow:0 6px 16px rgba(22,163,74,.25);transition:opacity .15s;}
+.copy-confirm-btn:disabled{opacity:.35;cursor:not-allowed;}
+
 /* ── PROFILE INCOMPLETE BANNER ── */
 .profile-banner{margin:12px 16px 0;background:rgba(255,159,10,.1);border:1.5px solid rgba(255,159,10,.3);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;}
 .profile-banner-icon{font-size:24px;flex-shrink:0;}
@@ -869,7 +895,10 @@ body{height:100vh;height:100dvh;}
     <input type="file" id="photoScanInput" accept="image/*" capture="environment" style="display:none" onchange="doPhotoScan(this)">
     <input type="file" id="barcodeScanInput" accept="image/*" capture="environment" style="display:none" onchange="doBarcodeDetect(this)">
     <button class="analyze-btn" id="analyzeBtn" onclick="doAnalyze()" type="button">Analyze with AI ✦</button>
-    <button onclick="showMyFoods()" type="button" style="width:100%;background:var(--s1);border:.5px solid rgba(255,255,255,.1);border-radius:14px;padding:13px;color:var(--t2);font-size:14px;font-weight:500;cursor:pointer;font-family:var(--font);margin-bottom:20px;display:flex;align-items:center;justify-content:center;gap:8px">💾 My Saved Foods <span id="dbCountBadge" style="background:rgba(48,209,88,.15);color:#30d158;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700"></span></button>
+    <div style="display:flex;gap:8px;margin-bottom:20px">
+      <button onclick="showMyFoods()" type="button" style="flex:1;background:var(--s1);border:.5px solid rgba(255,255,255,.1);border-radius:14px;padding:13px;color:var(--t2);font-size:14px;font-weight:500;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:8px">💾 My Saved Foods <span id="dbCountBadge" style="background:rgba(48,209,88,.15);color:#30d158;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700"></span></button>
+      <button onclick="openCopyDayModal()" type="button" style="flex:1;background:var(--s1);border:.5px solid rgba(255,255,255,.1);border-radius:14px;padding:13px;color:var(--t2);font-size:14px;font-weight:500;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:6px">📋 Copy Past Day</button>
+    </div>
     <div id="areaResult"></div>
   </div>
 </div>
@@ -1373,6 +1402,33 @@ body{height:100vh;height:100dvh;}
 </div>
 
 </div><!-- /AC -->
+
+<!-- COPY PAST DAY MODAL -->
+<div id="copyDayOverlay" class="copy-day-overlay" onclick="closeCopyDayModal(event)">
+  <div class="copy-day-sheet">
+    <div class="copy-day-handle"></div>
+    <div class="copy-day-header">
+      <div class="copy-day-title">📋 Copy Meals From a Past Day</div>
+      <div class="copy-day-sub">Copying to: <b id="copyDayTargetLbl">today</b></div>
+    </div>
+    <!-- Step 1: pick a day -->
+    <div id="copyStep1" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
+      <div class="copy-day-list" id="copyDayList"></div>
+    </div>
+    <!-- Step 2: pick meals -->
+    <div id="copyStep2" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 20px;border-bottom:1px solid rgba(0,0,0,.06);flex-shrink:0">
+        <button onclick="backToCopyDayList()" type="button" style="background:none;border:none;color:var(--green);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);padding:0;display:flex;align-items:center;gap:4px">← Back</button>
+        <div id="copyStep2DateLbl" style="font-size:15px;font-weight:700;color:var(--t);flex:1"></div>
+        <div id="copyStep2CalLbl" style="font-size:12px;color:var(--t3)"></div>
+      </div>
+      <div class="copy-day-list" id="copyMealGroups"></div>
+      <div style="padding:12px 20px calc(20px + env(safe-area-inset-bottom,0px));flex-shrink:0;border-top:1px solid rgba(0,0,0,.06)">
+        <button id="copyConfirmBtn" onclick="confirmCopyMeals()" type="button" class="copy-confirm-btn" disabled>Select meals to copy</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ONBOARDING WALKTHROUGH -->
 <div id="onboardOverlay" class="onboard-overlay">
@@ -6411,6 +6467,167 @@ function renderNutriBars(elId, entries, key, unit, rda, color, emptyMsg, b12Mode
       +'<div class="admin-nutri-n">('+e.n+')</div>'
       +'</div>';
   }).join('');
+}
+
+/* ═══════════════════════════════════════
+   COPY PAST DAY
+═══════════════════════════════════════ */
+var _copyDay = null;        // dateString of selected source day
+var _copyMealSel = {};      // { breakfast: true, lunch: false, … }
+
+function openCopyDayModal() {
+  var today = new Date().toDateString();
+  // Collect past days that have entries, newest first, max 30
+  var days = Object.keys(historyLog)
+    .filter(function(ds){ return historyLog[ds] && historyLog[ds].length > 0 && ds !== logDateStr; })
+    .sort(function(a,b){ return new Date(b)-new Date(a); })
+    .slice(0,30);
+
+  if (!days.length) { showImportToast('No past days logged yet'); return; }
+
+  // Label the copy-to date
+  var toLabel = logDateStr === today ? 'today'
+    : new Date(logDateStr).toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+  document.getElementById('copyDayTargetLbl').textContent = toLabel;
+
+  // Build day list
+  var MEAL_ICONS = {breakfast:'☀️',lunch:'🌤',dinner:'🌙',snack:'🥨'};
+  var html = '';
+  days.forEach(function(ds){
+    var entries = historyLog[ds] || [];
+    var totalCal = entries.reduce(function(s,e){ return s+(e.calories||0); },0);
+    var meals = [...new Set(entries.map(function(e){ return e.meal; }))];
+    var mealStr = meals.map(function(m){ return (MEAL_ICONS[m]||'🍽️')+' '+m; }).join(' · ');
+    var lbl = _copyFmtDate(ds);
+    html += '<div class="copy-day-row" onclick="selectCopySourceDay(\''+ds+'\')">'
+      +'<div class="copy-day-row-info">'
+        +'<div class="copy-day-row-date">'+lbl+'</div>'
+        +'<div class="copy-day-row-meta">'+entries.length+' items · '+mealStr+'</div>'
+      +'</div>'
+      +'<div class="copy-day-row-kcal">'+Math.round(totalCal)+' kcal</div>'
+      +'<span style="color:var(--t3);font-size:18px;padding-left:4px">›</span>'
+      +'</div>';
+  });
+  document.getElementById('copyDayList').innerHTML = html;
+
+  // Show step 1
+  document.getElementById('copyStep1').style.display = 'flex';
+  document.getElementById('copyStep2').style.display = 'none';
+  document.getElementById('copyDayOverlay').classList.add('open');
+}
+
+function _copyFmtDate(ds) {
+  var d = new Date(ds);
+  var yest = new Date(); yest.setDate(yest.getDate()-1);
+  if (d.toDateString() === yest.toDateString()) return 'Yesterday';
+  return d.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+}
+
+function selectCopySourceDay(ds) {
+  _copyDay = ds;
+  var entries = historyLog[ds] || [];
+  var MEAL_ORDER = ['breakfast','lunch','dinner','snack'];
+  var MEAL_ICONS = {breakfast:'☀️',lunch:'🌤',dinner:'🌙',snack:'🥨'};
+
+  // Group entries by meal
+  var groups = {};
+  entries.forEach(function(e){
+    if (!groups[e.meal]) groups[e.meal] = [];
+    groups[e.meal].push(e);
+  });
+
+  // Default all meals selected
+  _copyMealSel = {};
+  Object.keys(groups).forEach(function(m){ _copyMealSel[m] = true; });
+
+  var totalCal = entries.reduce(function(s,e){ return s+(e.calories||0); },0);
+  document.getElementById('copyStep2DateLbl').textContent = _copyFmtDate(ds);
+  document.getElementById('copyStep2CalLbl').textContent = Math.round(totalCal)+' kcal total';
+
+  var html = '';
+  MEAL_ORDER.forEach(function(m){
+    if (!groups[m]) return;
+    var items = groups[m];
+    var mCal = items.reduce(function(s,e){ return s+(e.calories||0); },0);
+    var preview = items.slice(0,3).map(function(e){ return e.name; }).join(', ')+(items.length>3?'…':'');
+    html += '<div class="copy-meal-group" onclick="toggleCopyMeal(\''+m+'\')">'
+      +'<div class="copy-meal-check on" id="cmc-'+m+'">'
+        +'<svg width="12" height="9" viewBox="0 0 12 9" fill="none"><path d="M1 4l3.5 3.5L11 1" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+      +'</div>'
+      +'<div class="copy-meal-info">'
+        +'<div class="copy-meal-name">'+(MEAL_ICONS[m]||'🍽️')+' '+m.charAt(0).toUpperCase()+m.slice(1)
+          +' <span style="font-size:11px;color:var(--t3);font-weight:400">('+items.length+' item'+(items.length>1?'s':'')+')</span></div>'
+        +'<div class="copy-meal-items">'+preview+'</div>'
+      +'</div>'
+      +'<div class="copy-meal-kcal">'+Math.round(mCal)+' kcal</div>'
+      +'</div>';
+  });
+
+  document.getElementById('copyMealGroups').innerHTML = html;
+  document.getElementById('copyStep1').style.display = 'none';
+  document.getElementById('copyStep2').style.display = 'flex';
+  _refreshCopyBtn();
+}
+
+function toggleCopyMeal(m) {
+  _copyMealSel[m] = !_copyMealSel[m];
+  var el = document.getElementById('cmc-'+m);
+  if (el) {
+    if (_copyMealSel[m]) {
+      el.classList.add('on');
+      el.innerHTML = '<svg width="12" height="9" viewBox="0 0 12 9" fill="none"><path d="M1 4l3.5 3.5L11 1" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    } else {
+      el.classList.remove('on');
+      el.innerHTML = '';
+    }
+  }
+  _refreshCopyBtn();
+}
+
+function _refreshCopyBtn() {
+  var btn = document.getElementById('copyConfirmBtn');
+  if (!btn) return;
+  var n = Object.values(_copyMealSel).filter(Boolean).length;
+  btn.disabled = n === 0;
+  btn.textContent = n > 0 ? 'Copy '+n+' meal'+(n>1?'s':'')+' to log →' : 'Select at least one meal';
+}
+
+function backToCopyDayList() {
+  document.getElementById('copyStep1').style.display = 'flex';
+  document.getElementById('copyStep2').style.display = 'none';
+}
+
+function closeCopyDayModal(e) {
+  if (e && e.target !== document.getElementById('copyDayOverlay')) return;
+  document.getElementById('copyDayOverlay').classList.remove('open');
+}
+
+function confirmCopyMeals() {
+  if (!_copyDay) return;
+  var today = new Date().toDateString();
+  var toCopy = (historyLog[_copyDay]||[]).filter(function(e){ return !!_copyMealSel[e.meal]; });
+  if (!toCopy.length) return;
+
+  var base = Date.now();
+  toCopy.forEach(function(e, i){
+    var newEntry = Object.assign({}, e, { id: base + i });
+    if (logDateStr === today) {
+      log.push(newEntry);
+    } else {
+      if (!historyLog[logDateStr]) historyLog[logDateStr] = [];
+      historyLog[logDateStr].push(newEntry);
+    }
+  });
+
+  if (logDateStr === today) { persist(); debouncedSyncDaily(); }
+  else { localStorage.setItem('nt_h', JSON.stringify(historyLog)); }
+
+  refreshHome();
+  document.getElementById('copyDayOverlay').classList.remove('open');
+  var toNote = logDateStr !== today
+    ? ' to '+new Date(logDateStr).toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'})
+    : '';
+  showImportToast('✓ Copied '+toCopy.length+' items'+toNote);
 }
 
 /* ═══════════════════════════════════════
