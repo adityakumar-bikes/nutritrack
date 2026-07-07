@@ -2004,6 +2004,15 @@ var currentFoodName='';  // name of food currently being analyzed/shown
 var customGrams=null;    // when user types custom grams
 
 /* ═══════════════════════════════════════
+   HTML ESCAPING — apply to ALL user/AI-sourced
+   strings before innerHTML concatenation
+═══════════════════════════════════════ */
+function esc(s){
+  if(s===null||s===undefined) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+/* ═══════════════════════════════════════
    INIT
 ═══════════════════════════════════════ */
 (function(){
@@ -2043,7 +2052,7 @@ function persist(){
     localStorage.setItem('nt_d',today);
     historyLog[today]=log;
     var keys=Object.keys(historyLog).sort(function(a,b){return new Date(a)-new Date(b);});
-    while(keys.length>30)delete historyLog[keys.shift()];
+    while(keys.length>365)delete historyLog[keys.shift()];
     localStorage.setItem('nt_h',JSON.stringify(historyLog));
     localStorage.setItem('nt_db',JSON.stringify(foodDB));
     localStorage.setItem('nt_sl',JSON.stringify(suppList));
@@ -2247,7 +2256,7 @@ async function doAnalyze(){
   if(foodDB[key]){loadFromDB(key);return;}
 
   document.getElementById('analyzeBtn').disabled=true;
-  document.getElementById('areaResult').innerHTML='<div class="ldots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><div style="text-align:center;color:var(--t2);font-size:14px;margin-top:-10px;padding-bottom:20px">Analyzing "'+q+'"…</div>';
+  document.getElementById('areaResult').innerHTML='<div class="ldots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><div style="text-align:center;color:var(--t2);font-size:14px;margin-top:-10px;padding-bottom:20px">Analyzing "'+esc(q)+'"…</div>';
 
   var dietId=P.diet||'none';
   var dietContext=dietId!=='none'?'\nUser is on '+DIETS[dietId].name+' diet ('+DIETS[dietId].macroHint+'). In the tips field, give a specific '+DIETS[dietId].name+'-relevant tip for this food.':'';
@@ -2301,7 +2310,7 @@ function renderResult(n,fromDB){
   var alreadySaved=!!foodDB[dbKey(n.name)];
 
   var html='<div class="res-card">';
-  html+='<div class="res-top"><div class="res-emo">'+emo(n.name)+'</div><div><div class="res-title">'+n.name+'</div><div class="res-srv-lbl">Choose serving size below</div></div></div>';
+  html+='<div class="res-top"><div class="res-emo">'+emo(n.name)+'</div><div><div class="res-title">'+esc(n.name)+'</div><div class="res-srv-lbl">Choose serving size below</div></div></div>';
 
   // Save to DB button
   html+='<button class="save-food-btn'+(alreadySaved?' saved':'')+'" id="saveFoodBtn" onclick="saveFoodToDB()" type="button">'+(alreadySaved?'✓ Saved to My Foods':'💾 Save to My Foods')+'</button>';
@@ -2452,7 +2461,7 @@ function showMyFoods(){
     html+='<div class="mf-check" id="mfc-'+k+'" onclick="mfToggle(\''+k+'\')" data-k="'+k+'"></div>';
     html+='<div style="font-size:20px;width:34px;height:34px;background:var(--s2);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+emo(f.name)+'</div>';
     html+='<div style="flex:1;min-width:0">';
-    html+='<div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+f.name+liquidBadge+'</div>';
+    html+='<div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(f.name)+liquidBadge+'</div>';
     html+='<div style="font-size:10px;color:var(--t2);margin-top:1px">'+cal+' kcal · P:'+pro+'g / 100'+(f.isLiquid?'ml':'g')+'</div>';
     html+='</div>';
     html+='<select class="mf-meal-sel" id="mfm-'+k+'" onchange="mfSetMeal(\''+k+'\',this.value)">';
@@ -2613,7 +2622,7 @@ function addEntry(name,hasConflict){
   NBase=null;servings=[];activeSrv=0;activeQty=1;customGrams=null;currentFoodName='';NIsLiquid=false;
 
   var dateNote=logDateStr!==today?' ('+new Date(logDateStr).toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'})+')'  :'';
-  document.getElementById('areaResult').innerHTML='<div class="ok"><div class="ok-i">✅</div><div class="ok-h">Added to log!</div><div class="ok-s">'+name+' · '+d.calories+' kcal'+dateNote+'</div></div>';
+  document.getElementById('areaResult').innerHTML='<div class="ok"><div class="ok-i">✅</div><div class="ok-h">Added to log!</div><div class="ok-s">'+esc(name)+' · '+d.calories+' kcal'+dateNote+'</div></div>';
   setTimeout(function(){document.getElementById('areaResult').innerHTML='';},2500);
 }
 
@@ -2827,7 +2836,7 @@ function refreshHome(){
       (isSelecting?'<div style="width:22px;height:22px;border-radius:6px;border:1.5px solid '+(isSel?'var(--green)':'rgba(255,255,255,.2)')+';background:'+(isSel?'var(--green)':'transparent')+';display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px">'+(isSel?'✓':'')+'</div>':'')+
       '<div class="femo">'+emo(f.name)+'</div>'+
       '<div class="finfo">'+
-        '<div class="fname">'+f.name+'</div>'+
+        '<div class="fname">'+esc(f.name)+'</div>'+
         '<div class="fdet">'+
           '<button class="mbadge mb-'+f.meal+' meal-change-btn" onclick="cycleMealEntry('+f.id+')" title="Tap to change meal" type="button">'+mealIcon+' '+f.meal+'</button>'+
           conflictTag+
@@ -3199,7 +3208,7 @@ function renderBurnLogList(){
   entries.forEach(function(e,i){
     html+='<div style="display:flex;align-items:center;background:rgba(255,107,53,.08);border:.5px solid rgba(255,107,53,.2);border-radius:12px;padding:9px 12px;gap:10px">';
     html+='<span style="font-size:18px">'+e.icon+'</span>';
-    html+='<div style="flex:1"><div style="font-size:13px;font-weight:600">'+e.name+'</div>';
+    html+='<div style="flex:1"><div style="font-size:13px;font-weight:600">'+esc(e.name)+'</div>';
     html+='<div style="font-size:11px;color:var(--t3)">'+e.duration+' min · '+e.kcal+' kcal</div></div>';
     html+='<button onclick="removeBurnEntry('+i+')" type="button" style="background:none;border:none;color:var(--t3);font-size:16px;cursor:pointer;padding:4px;line-height:1">✕</button>';
     html+='</div>';
@@ -4014,7 +4023,7 @@ function renderTopContributors(){
     html+='<td><div style="display:flex;align-items:center;gap:6px">';
     html+='<span style="font-size:15px;flex-shrink:0">'+emo(f.name)+'</span>';
     html+='<div style="min-width:0">';
-    html+='<div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:88px">'+f.name+'</div>';
+    html+='<div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:88px">'+esc(f.name)+'</div>';
     if(f.count>1) html+='<div style="font-size:9px;color:var(--t3)">×'+f.count+' times</div>';
     if(crowns)    html+='<div style="font-size:10px;line-height:1.4">'+crowns+'</div>';
     html+='</div></div></td>';
@@ -4144,7 +4153,7 @@ async function doSuppScan(input){
     if(n.magnesium)found.push('Mg '+n.magnesium+'mg');
     if(n.omega3)   found.push('ω3 '+n.omega3+'mg');
     statusEl.style.display='block';
-    statusEl.innerHTML='✅ Label read: <b style="color:var(--t)">'+n.name+'</b>'+(found.length?' · '+found.join(', '):'');
+    statusEl.innerHTML='✅ Label read: <b style="color:var(--t)">'+esc(n.name)+'</b>'+(found.length?' · '+esc(found.join(', ')):'');
   }catch(e){
     statusEl.textContent='⚠️ Could not read label: '+e.message+'. Fill fields manually.';
   }
@@ -4303,7 +4312,7 @@ function scheduleReminder(s){
 function showSuppReminder(s){
   var banner=document.createElement('div');
   banner.style.cssText='position:fixed;top:calc(env(safe-area-inset-top,44px) + 10px);left:50%;transform:translateX(-50%);background:#1c1c1e;border:.5px solid rgba(191,90,242,.4);border-radius:16px;padding:14px 18px;z-index:999;box-shadow:0 8px 32px rgba(0,0,0,.6);min-width:260px;max-width:320px;display:flex;align-items:center;gap:12px;animation:slideDown .3s ease';
-  banner.innerHTML='<span style="font-size:26px">'+(SUPP_ICONS[s.type]||'💊')+'</span><div><div style="font-size:14px;font-weight:700;color:#fff">Time to take '+s.name+'!</div><div style="font-size:12px;color:rgba(235,235,245,.6);margin-top:2px">'+(s.dose||'')+'</div></div><button onclick="this.parentElement.remove()" style="margin-left:auto;background:none;border:none;color:rgba(235,235,245,.4);font-size:18px;cursor:pointer;padding:4px">✕</button>';
+  banner.innerHTML='<span style="font-size:26px">'+(SUPP_ICONS[s.type]||'💊')+'</span><div><div style="font-size:14px;font-weight:700;color:#fff">Time to take '+esc(s.name)+'!</div><div style="font-size:12px;color:rgba(235,235,245,.6);margin-top:2px">'+esc(s.dose||'')+'</div></div><button onclick="this.parentElement.remove()" style="margin-left:auto;background:none;border:none;color:rgba(235,235,245,.4);font-size:18px;cursor:pointer;padding:4px">✕</button>';
   // Add slide animation
   var style=document.createElement('style');
   style.textContent='@keyframes slideDown{from{opacity:0;transform:translateX(-50%) translateY(-20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}';
@@ -4327,7 +4336,7 @@ function renderSuppScreen(){
       html+='<div class="supp-today-h">✅ Taken Today &nbsp;·&nbsp; '+totalSuppCal+' kcal from supplements</div>';
       html+='<div class="supp-today-row">';
       takenSupps.forEach(function(s){
-        html+='<div class="supp-today-chip">'+SUPP_ICONS[s.type||'other']+' '+s.name+'</div>';
+        html+='<div class="supp-today-chip">'+SUPP_ICONS[s.type||'other']+' '+esc(s.name)+'</div>';
       });
       html+='</div></div>';
       strip.innerHTML=html;
@@ -4352,7 +4361,7 @@ function renderSuppScreen(){
     html+='<div class="supp-item">';
     html+='<div class="supp-item-top">';
     html+='<div class="supp-item-ico">'+ico+'</div>';
-    html+='<div style="flex:1;min-width:0"><div class="supp-item-name">'+s.name+'</div>';
+    html+='<div style="flex:1;min-width:0"><div class="supp-item-name">'+esc(s.name)+'</div>';
     if(s.dose) html+='<div class="supp-item-dose">'+s.dose+'</div>';
     html+='</div></div>';
     var hasMicros=s.calcium||s.iron||s.vitamin_c||s.vitamin_d||s.vitamin_b12||s.zinc||s.magnesium||s.omega3||s.potassium||s.sodium||s.fiber;
@@ -5367,7 +5376,7 @@ function renderDetectedList(){
   html+='<div class="detected-chips" id="detChips">';
   items.forEach(function(item,i){
     var sel=!!_photoSelected[i];
-    html+='<button class="det-chip'+(sel?' det-chip-sel':'')+'" onclick="toggleDetected('+i+')" type="button" id="detc'+i+'">'+item+'</button>';
+    html+='<button class="det-chip'+(sel?' det-chip-sel':'')+'" onclick="toggleDetected('+i+')" type="button" id="detc'+i+'">'+esc(item)+'</button>';
   });
   html+='</div>';
   html+='<div style="margin-top:14px;display:flex;gap:8px" id="detActions">';
@@ -5685,7 +5694,7 @@ function showSearchDrop(q){
       var cal=Math.round(f.per100g.calories);
       html+='<div class="drop-item" onclick="loadFromDB(\''+dbKey(f.name)+'\')">';
       html+='<div class="drop-item-ico">'+emo(f.name)+'</div>';
-      html+='<div class="drop-item-info"><div class="drop-item-name">'+f.name+'</div>';
+      html+='<div class="drop-item-info"><div class="drop-item-name">'+esc(f.name)+'</div>';
       html+='<div class="drop-item-sub">'+cal+' kcal/100g · saved</div></div>';
       html+='<div class="drop-item-badge">Saved</div></div>';
     });
@@ -5905,7 +5914,7 @@ function delEntryFromViewWithUndo(id){
   var remaining=entries.filter(function(f){return f.id!==id;});
   saveViewLog(remaining);
   persist();refreshHome();
-  showUndoToast('"'+entry.name+'" deleted');
+  showUndoToast('"'+esc(entry.name)+'" deleted');
 }
 function showUndoToast(msg){
   if(undoTimer) clearTimeout(undoTimer);
@@ -6365,7 +6374,7 @@ function refreshAccountWidget(){
     roleEl.className   = 'acct-role ' + (u.role === 'admin' ? 'admin' : 'user');
   }
   if(fallback && u.photo){
-    fallback.outerHTML = '<img class="acct-avatar" id="acctAvatarFallback" src="'+u.photo+'" alt="avatar" onerror="this.outerHTML=\'<div class=acct-avatar-fallback id=acctAvatarFallback>👤<\/div>\'">';
+    fallback.outerHTML = '<img class="acct-avatar" id="acctAvatarFallback" src="'+esc(u.photo)+'" alt="avatar" onerror="this.outerHTML=\'<div class=acct-avatar-fallback id=acctAvatarFallback>👤<\/div>\'">';
   }
 }
 
@@ -6549,7 +6558,7 @@ function selectCopySourceDay(ds) {
     if (!groups[m]) return;
     var items = groups[m];
     var mCal = items.reduce(function(s,e){ return s+(e.calories||0); },0);
-    var preview = items.slice(0,3).map(function(e){ return e.name; }).join(', ')+(items.length>3?'…':'');
+    var preview = esc(items.slice(0,3).map(function(e){ return e.name; }).join(', '))+(items.length>3?'…':'');
     html += '<div class="copy-meal-group" onclick="toggleCopyMeal(\''+m+'\')">'
       +'<div class="copy-meal-check on" id="cmc-'+m+'">'
         +'<svg width="12" height="9" viewBox="0 0 12 9" fill="none"><path d="M1 4l3.5 3.5L11 1" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
@@ -6874,7 +6883,7 @@ function renderUserCard(u, isPending){
   var isSelf  = window._ntCurrentUser && u.uid === window._ntCurrentUser.uid;
   var isAdmin = u.role === 'admin';
   var avatarHtml = u.photo
-    ? '<img class="ucard-avatar" src="'+u.photo+'" alt="" onerror="this.style.display=\'none\'">'
+    ? '<img class="ucard-avatar" src="'+esc(u.photo)+'" alt="" onerror="this.style.display=\'none\'">'
     : '<div class="ucard-avatar">👤</div>';
   var joined = u.createdAt && u.createdAt.toDate ? u.createdAt.toDate().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '—';
   var lastSeen = u.lastLogin && u.lastLogin.toDate ? _relTime(u.lastLogin.toDate()) : '—';
@@ -6895,7 +6904,7 @@ function renderUserCard(u, isPending){
   if(u.lastDayCal) tags.push('🔥'+u.lastDayCal+'kcal');
 
   var tagsHtml = tags.length
-    ? '<div class="ucard-profile-row">'+tags.map(function(t){return '<span class="ucard-tag">'+t+'</span>';}).join('')+'</div>'
+    ? '<div class="ucard-profile-row">'+tags.map(function(t){return '<span class="ucard-tag">'+esc(t)+'</span>';}).join('')+'</div>'
     : '';
 
   var actions = '';
@@ -6920,8 +6929,8 @@ function renderUserCard(u, isPending){
   return '<div class="ucard'+(isPending?' pending-u':'')+'">'
     + avatarHtml
     + '<div class="ucard-info" style="min-width:0;flex:1">'
-    +   '<div class="ucard-name">'+(u.name||'—')+'</div>'
-    +   '<div class="ucard-email">'+(u.email||'—')+'</div>'
+    +   '<div class="ucard-name">'+esc(u.name||'—')+'</div>'
+    +   '<div class="ucard-email">'+esc(u.email||'—')+'</div>'
     +   '<div style="margin-top:3px">'+ roleHtml
     +     '<span style="font-size:9px;color:var(--t3);margin-left:6px">Joined '+joined+'</span>'
     +     '<span style="font-size:9px;color:var(--t3);margin-left:6px">· Seen '+lastSeen+'</span>'
