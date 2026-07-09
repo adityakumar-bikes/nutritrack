@@ -2114,6 +2114,36 @@ var currentFoodName='';  // name of food currently being analyzed/shown
 var customGrams=null;    // when user types custom grams
 
 /* ═══════════════════════════════════════
+   AI ENDPOINT — direct or proxied
+   If config/app.proxyUrl is set, all AI calls go through the
+   server-side proxy (Firebase ID token auth) and the Anthropic
+   key stays off the client entirely.
+═══════════════════════════════════════ */
+var AI_PROXY_URL='';
+var _aiIdToken=null;
+
+function aiEndpoint(){
+  return AI_PROXY_URL||'https://api.anthropic.com/v1/messages';
+}
+
+function aiHeaders(){
+  if(AI_PROXY_URL&&_aiIdToken){
+    return {'Content-Type':'application/json','Authorization':'Bearer '+_aiIdToken};
+  }
+  return {'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'};
+}
+
+function refreshAiToken(){
+  try{
+    if(window._fbAuth&&_fbAuth.currentUser){
+      _fbAuth.currentUser.getIdToken().then(function(t){_aiIdToken=t;}).catch(function(){});
+    }
+  }catch(e){}
+}
+// Firebase ID tokens expire after 60 min — keep a fresh one at hand
+setInterval(refreshAiToken,25*60*1000);
+
+/* ═══════════════════════════════════════
    OFFLINE DETECTION + PENDING ANALYSIS QUEUE
 ═══════════════════════════════════════ */
 var pendingQ=[];
@@ -2465,7 +2495,7 @@ async function doAnalyze(){
     }
 
     var prompt='You are a precise nutrition database. Use USDA FoodData Central and IFCT (Indian Food Composition Tables) as your primary references for accurate values. Analyze: "'+q+'".'+dietContext+'\n\nReturn ONLY raw JSON (no markdown, no backticks). All per100g values MUST be accurate and match verified nutritional databases — do NOT round to convenient numbers or estimate loosely:\n{\n"name": "clean food name",\n"isLiquid": false,\n"per100g": {"calories":0,"protein":0,"carbs":0,"fat":0,"fiber":0,"sugar":0,"sodium":0,"calcium":0,"iron":0,"vitamin_c":0,"potassium":0,"cholesterol":0,"ldl":0,"hdl":0,"saturated_fat":0,"omega3":0,"vitamin_b12":0,"selenium":0},\n"servings": [\n  {"label":"100ml","grams":100},\n  {"label":"1 glass (250ml)","grams":250},\n  {"label":"1 cup (200ml)","grams":200},\n  {"label":"500ml","grams":500},\n  {"label":"1 shot (30ml)","grams":30}\n],\n"isCountable": false,\n"unitWeightG": 0,\n"unitName": "piece",\n"tips": "one specific fitness or diet tip"\n}\n\nRules:\n- Values must reflect the food as typically prepared/consumed (cooked rice vs raw, etc.).\n- For Indian dishes (dal, sabzi, roti, biryani etc.) use IFCT or INDB values as the baseline.\n- isLiquid=true for ANY liquid/beverage: juice, milk, smoothie, shake, coffee, tea, soup, broth, lassi, chaas, coconut water, energy drink, soft drink, alcohol, etc.\n- isLiquid=false for all solid foods\n- For LIQUID foods: use ml labels (100ml, 250ml etc.), grams field = ml value (1ml≈1g for most drinks)\n- For SOLID foods: use gram/piece labels as normal\n- isCountable=true if food is typically counted in pieces/units (almonds, eggs, dates, biscuits, etc.)\n- unitWeightG = weight of one single unit/piece in grams (only for countable solids)\n- unitName = singular name for one unit\n- Only include servings that make sense for this food. Min 3, max 8.\n- Always include a gram-based option and a single-piece option for countable solid foods.\n- For small countable foods (e.g. almonds), include 5, 10, 15 piece options too.\n- omega3 is in mg per 100g. vitamin_b12 is in µg per 100g. selenium is in µg per 100g.\n- ldl and hdl are estimated mg per 100g based on food type (0 if not applicable).';
-    var resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1500,messages:[{role:'user',content:prompt}]})});
+    var resp=await fetch(aiEndpoint(),{method:'POST',headers:aiHeaders(),body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1500,messages:[{role:'user',content:prompt}]})});
     if(!resp.ok){var e=await resp.json();throw new Error(e.error&&e.error.message?e.error.message:'API error '+resp.status);}
     var data=await resp.json();
     var txt=data.content.map(function(i){return i.text||'';}).join('');
@@ -4357,9 +4387,9 @@ async function doSuppScan(input){
   var mt=file.type&&file.type.startsWith('image/')?file.type:'image/jpeg';
   try{
     var prompt='You are a nutrition expert and pharmacist. This is a photo of a supplement, nutraceutical, or medicine label. It may contain chemical/IUPAC/salt names (e.g. Cholecalciferol, Pyridoxine Hydrochloride, Ferrous Fumarate, Zinc Bisglycinate, Magnesium Glycinate, DHA, EPA, etc.).\n\nExtract:\n1. Product name (use the brand/common name if visible, otherwise the main ingredient)\n2. Dose/serving description (e.g. "1 tablet", "1 scoop = 5g")\n3. All nutritional values per serving\n\nReturn ONLY raw JSON (no markdown, no backticks):\n{\n  "name": "product name",\n  "dose": "serving description",\n  "type": "vitamin|mineral|protein|medicine|probiotic|omega|other",\n  "calories": 0,\n  "protein": 0,\n  "carbs": 0,\n  "fat": 0,\n  "fiber": 0,\n  "sodium": 0,\n  "calcium": 0,\n  "iron": 0,\n  "vitamin_c": 0,\n  "vitamin_d": 0,\n  "vitamin_b12": 0,\n  "zinc": 0,\n  "magnesium": 0,\n  "omega3": 0,\n  "potassium": 0\n}\nUnits: calories=kcal, protein/carbs/fat/fiber=g, vitamin_d=IU, vitamin_b12=mcg, all others=mg.\nIf a value is not present on the label, use 0. Never guess — only use values actually printed on the label.';
-    var resp=await fetch('https://api.anthropic.com/v1/messages',{
+    var resp=await fetch(aiEndpoint(),{
       method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      headers:aiHeaders(),
       body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:600,
         messages:[{role:'user',content:[
           {type:'image',source:{type:'base64',media_type:mt,data:base64}},
@@ -5038,9 +5068,9 @@ async function runCoachAnalysis(){
         '  "weight_verdict": "no_target",\n  "weight_insight": ""\n')+
       '}';
 
-    var resp=await fetch('https://api.anthropic.com/v1/messages',{
+    var resp=await fetch(aiEndpoint(),{
       method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      headers:aiHeaders(),
       body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:900,messages:[{role:'user',content:prompt}]})
     });
     if(!resp.ok){var e=await resp.json();throw new Error(e.error&&e.error.message?e.error.message:'API error');}
@@ -5614,9 +5644,9 @@ async function doPhotoScan(input){
   });
   var mt=file.type&&file.type.startsWith('image/')?file.type:'image/jpeg';
   try{
-    var resp=await fetch('https://api.anthropic.com/v1/messages',{
+    var resp=await fetch(aiEndpoint(),{
       method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      headers:aiHeaders(),
       body:JSON.stringify({
         model:'claude-haiku-4-5-20251001',
         max_tokens:400,
@@ -5706,7 +5736,7 @@ async function analyzeSelectedItems(){
       var dietId=P.diet||'none';
       var dietContext=dietId!=='none'?'\nUser is on '+DIETS[dietId].name+' diet.':'';
       var prompt='You are a nutrition database. Analyze: "'+nm+'".'+dietContext+'\n\nReturn ONLY raw JSON (no markdown, no backticks):\n{"name":"food name","isLiquid":false,"per100g":{"calories":0,"protein":0,"carbs":0,"fat":0,"fiber":0,"sugar":0,"sodium":0,"calcium":0,"iron":0,"vitamin_c":0,"potassium":0,"cholesterol":0,"ldl":0,"hdl":0,"saturated_fat":0,"omega3":0,"vitamin_b12":0,"selenium":0},"servings":[{"label":"100g","grams":100}],"isCountable":false,"unitWeightG":0,"unitName":"piece","tips":""}';
-      var resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:900,messages:[{role:'user',content:prompt}]})});
+      var resp=await fetch(aiEndpoint(),{method:'POST',headers:aiHeaders(),body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:900,messages:[{role:'user',content:prompt}]})});
       if(!resp.ok){var er=await resp.json();throw new Error(er.error&&er.error.message?er.error.message:'API error');}
       var data=await resp.json();
       var txt=data.content.map(function(c){return c.text||'';}).join('').trim();
@@ -5778,9 +5808,9 @@ async function doBarcodeDetect(input){
       var r=new FileReader();r.onload=function(e){res(e.target.result.split(',')[1]);};r.readAsDataURL(file);
     });
     var mt=file.type&&file.type.startsWith('image/')?file.type:'image/jpeg';
-    var resp=await fetch('https://api.anthropic.com/v1/messages',{
+    var resp=await fetch(aiEndpoint(),{
       method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      headers:aiHeaders(),
       body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:50,
         messages:[{role:'user',content:[
           {type:'image',source:{type:'base64',media_type:mt,data:base64}},
@@ -6354,8 +6384,8 @@ async function runExerciseSuggestions(){
       recompNote+'\n'+
       'Return ONLY raw JSON (no markdown, no backticks):\n'+
       '{"exercises":[{"name":"Exercise Name","type":"Cardio|Strength|Flexibility|HIIT","duration":"30 min","sets":"3 sets x 12 reps","calories_burned":"~200 kcal","intensity":"Low|Moderate|High","tip":"one specific tip"}],"weekly_note":"One motivating sentence about this plan."}';
-    var resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    var resp=await fetch(aiEndpoint(),{method:'POST',
+      headers:aiHeaders(),
       body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:2000,messages:[{role:'user',content:prompt}]})});
     if(!resp.ok){var e=await resp.json();throw new Error(e.error&&e.error.message?e.error.message:'API error');}
     var data=await resp.json();
@@ -6432,8 +6462,8 @@ async function runRecipeSuggestions(){
       'CONSTRAINTS: '+diet+' diet | ~'+mealCal+' kcal per meal | Daily protein goal: '+proGoal+'g | Prefer Indian or Indian-fusion options.\n\n'+
       'Return ONLY raw JSON (no markdown, no backticks):\n'+
       '{"recipes":[{"name":"Recipe Name","calories":"~350 kcal","protein":"25g protein","prep_time":"15 min","ingredients":["item1","item2","item3"],"method":"2-3 sentences on how to prepare it.","diet_note":"Why this fits the diet plan"}]}';
-    var resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    var resp=await fetch(aiEndpoint(),{method:'POST',
+      headers:aiHeaders(),
       body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1200,messages:[{role:'user',content:prompt}]})});
     if(!resp.ok){var e=await resp.json();throw new Error(e.error&&e.error.message?e.error.message:'API error');}
     var data=await resp.json();
@@ -6540,6 +6570,7 @@ function initFirebaseAuth(){
     });
 
     _fbAuth.onAuthStateChanged(function(user){
+      if(user) refreshAiToken();
       if(!user){
         showLoginScreen();
         return;
@@ -6598,6 +6629,10 @@ async function fetchSharedApiKey(){
     if(cfgDoc.exists){
       var k = cfgDoc.data().anthropicKey;
       if(k){ apiKey=k; localStorage.setItem('nt_k', k); }
+      // Proxy mode: when set, all AI calls route through the server-side
+      // proxy and the raw key never needs to reach the client
+      var pu = cfgDoc.data().proxyUrl;
+      if(pu){ AI_PROXY_URL=pu; refreshAiToken(); }
     }
   }catch(e){ console.warn('[Auth] fetchSharedApiKey:', e); }
 }
